@@ -11,6 +11,7 @@ OPERATING_COST_PER_KM = 300.0
 ZERO_LOCO_WAIT_HOURS = 12.0
 AC_DC_SWITCH_PENALTY_HOURS = 2.0
 DEFAULT_AVAILABLE_LOCOMOTIVES = 5
+DEFAULT_TRACK_TYPE = "double"
 TRACK_SPEEDS_KMH = {"single": 45.0, "double": 65.0}
 
 
@@ -86,10 +87,12 @@ def _route_segment_distance_km(graph: nx.DiGraph, u: str, v: str, edge_data: dic
 
 
 def _segment_base_time_hours(graph: nx.DiGraph, u: str, v: str, edge_data: dict) -> float:
-    track_type = str(edge_data.get("track_type", "double")).lower()
-    speed_kmh = TRACK_SPEEDS_KMH.get(track_type, TRACK_SPEEDS_KMH["double"])
+    track_type = str(edge_data.get("track_type", DEFAULT_TRACK_TYPE)).lower()
+    speed_kmh = TRACK_SPEEDS_KMH.get(track_type, TRACK_SPEEDS_KMH[DEFAULT_TRACK_TYPE])
+    if speed_kmh <= 0:
+        raise ValueError(f"Invalid track speed for track_type={track_type!r}: {speed_kmh}")
     distance_km = _route_segment_distance_km(graph, u, v, edge_data)
-    return distance_km / speed_kmh if speed_kmh > 0 else distance_km
+    return distance_km / speed_kmh
 
 
 def _segment_time_hours(graph: nx.DiGraph, u: str, v: str, edge_data: dict) -> float:
