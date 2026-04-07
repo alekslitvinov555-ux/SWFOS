@@ -18,6 +18,8 @@ class TestGraphBuilder(unittest.TestCase):
         self.assertIn("Kryvyi Rih", graph.nodes)
         self.assertIn("Odesa-Sortuvalna", graph.nodes)
         self.assertIn("Izmail", graph.nodes)
+        self.assertEqual(graph.nodes["Kryvyi Rih"]["available_locomotives"], 5)
+        self.assertEqual(graph.nodes["Odesa-Sortuvalna"]["available_locomotives"], 0)
         self.assertEqual(len(graph.edges), 28)
 
         forward_waypoints = graph["Odesa-Sortuvalna"]["Bilhorod-Dnistrovskyi"]["waypoints"]

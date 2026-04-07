@@ -4,7 +4,7 @@ import unittest
 
 import networkx as nx
 
-from src.routing import find_optimal_route
+from src.routing import calculate_route_cost, find_optimal_route, find_shortest_distance_route
 
 
 class TestRouting(unittest.TestCase):
@@ -17,7 +17,7 @@ class TestRouting(unittest.TestCase):
         g = nx.DiGraph()
 
         g.add_node("A", capacity=100, current_load=10, lat=0.0, lon=0.0)
-        g.add_node("B", capacity=100, current_load=20, lat=0.0, lon=1.0)
+        g.add_node("B", capacity=100, current_load=20, available_locomotives=5, lat=0.0, lon=1.0)
         g.add_node("C", capacity=100, current_load=20, lat=1.0, lon=0.0)
         g.add_node("D", capacity=100, current_load=20, lat=1.0, lon=1.0)
 
@@ -37,6 +37,8 @@ class TestRouting(unittest.TestCase):
         self.assertEqual(result.path, ["A", "B", "D"])
         self.assertGreater(result.total_cost, 0)
         self.assertEqual(len(result.segment_costs), 2)
+        self.assertGreater(result.total_time_hours, 0)
+        self.assertGreater(result.total_distance_km, 0)
 
     def test_overloaded_station_above_90_percent_is_avoided(self) -> None:
         graph = self._build_base_graph()
@@ -49,6 +51,32 @@ class TestRouting(unittest.TestCase):
         self.assertEqual(result.path, ["A", "C", "D"])
         self.assertGreater(result.total_cost, 0)
         self.assertEqual(len(result.segment_costs), 2)
+
+    def test_zero_locomotives_adds_soft_penalty_and_discourages_path(self) -> None:
+        graph = self._build_base_graph()
+        graph.nodes["B"]["available_locomotives"] = 0
+
+        result = find_optimal_route(graph, source="A", target="D")
+        self.assertEqual(result.path, ["A", "C", "D"])
+
+    def test_shortest_distance_route_baseline_is_available(self) -> None:
+        graph = self._build_base_graph()
+
+        baseline = find_shortest_distance_route(graph, source="A", target="D")
+
+        self.assertIn(baseline.path, (["A", "B", "D"], ["A", "C", "D"]))
+        self.assertGreater(baseline.total_cost, 0)
+
+    def test_calculate_route_cost_uses_given_time(self) -> None:
+        graph = self._build_base_graph()
+        route = ["A", "B", "D"]
+
+        with_given_time = calculate_route_cost(graph, route=route, time_hours=5.0)
+        with_derived_time = calculate_route_cost(graph, route=route, time_hours=None)
+
+        self.assertGreater(with_given_time, 0)
+        self.assertGreater(with_derived_time, 0)
+        self.assertNotEqual(with_given_time, with_derived_time)
 
 
 if __name__ == "__main__":
