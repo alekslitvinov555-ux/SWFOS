@@ -70,26 +70,6 @@
     "bidirectional": true
   },
   {
-    "source": "Kulyndorove",
-    "target": "Chornomorsk Port",
-    "base_time": 1.1,
-    "track_type": "single",
-    "max_capacity": 76,
-    "current_flow": 38,
-    "waypoints": [],
-    "bidirectional": true
-  },
-  {
-    "source": "Chornomorsk Port",
-    "target": "Odesa-Port",
-    "base_time": 0.9,
-    "track_type": "double",
-    "max_capacity": 84,
-    "current_flow": 36,
-    "waypoints": [],
-    "bidirectional": true
-  },
-  {
     "source": "Kolosivka",
     "target": "Chornomorsk Port",
     "base_time": 2.3,

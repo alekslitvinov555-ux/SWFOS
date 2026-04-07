@@ -28,7 +28,7 @@ class TestGraphBuilder(unittest.TestCase):
         self.assertTrue(graph.nodes["Tymkove"]["is_ac_dc_switch"])
         self.assertTrue(graph.nodes["Pyatykhatky"]["is_ac_dc_switch"])
         self.assertEqual(graph.nodes["Odesa-Sortuvalna"]["available_locomotives"], 0)
-        self.assertEqual(len(graph.edges), 32)
+        self.assertEqual(len(graph.edges), 28)
 
         self.assertEqual(graph["Kryvyi Rih"]["Tymkove"]["track_type"], "double")
         self.assertEqual(graph["Tymkove"]["Kropyvnytska"]["track_type"], "single")
