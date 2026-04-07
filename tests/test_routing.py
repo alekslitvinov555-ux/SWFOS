@@ -116,7 +116,7 @@ class TestRouting(unittest.TestCase):
         self.assertEqual(bottleneck_result.path[-1], "Odesa-Port")
         self.assertGreater(bottleneck_result.total_time_hours, normal_result.total_time_hours)
 
-    def test_derailment_uses_bypass_via_pomichna_and_borshchivka(self) -> None:
+    def test_derailment_uses_bypass_via_pomichna_borshchivka(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
         graph = build_graph(project_root / "data" / "stations.json", project_root / "data" / "edges.json")
 

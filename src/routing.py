@@ -88,7 +88,9 @@ def _route_segment_distance_km(graph: nx.DiGraph, u: str, v: str, edge_data: dic
 
 def _segment_base_time_hours(graph: nx.DiGraph, u: str, v: str, edge_data: dict) -> float:
     track_type = str(edge_data.get("track_type", DEFAULT_TRACK_TYPE)).lower()
-    speed_kmh = TRACK_SPEEDS_KMH.get(track_type, TRACK_SPEEDS_KMH[DEFAULT_TRACK_TYPE])
+    if track_type not in TRACK_SPEEDS_KMH:
+        track_type = DEFAULT_TRACK_TYPE
+    speed_kmh = TRACK_SPEEDS_KMH[track_type]
     if speed_kmh <= 0:
         raise ValueError(f"Invalid track speed for track_type={track_type!r}: {speed_kmh}")
     distance_km = _route_segment_distance_km(graph, u, v, edge_data)
