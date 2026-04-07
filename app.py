@@ -295,8 +295,8 @@ def main() -> None:
         st.warning("No feasible route was found for the selected stations.")
         return
 
-    dumb_baseline_cost = calculate_route_cost(graph, baseline_route.path)
-    money_saved = dumb_baseline_cost - result.total_cost
+    baseline_cost = calculate_route_cost(graph, baseline_route.path)
+    money_saved = baseline_cost - result.total_cost
 
     kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
     with kpi_col1:
@@ -304,11 +304,11 @@ def main() -> None:
     with kpi_col2:
         st.metric("Smart Route Cost", _format_currency_uah(result.total_cost))
     with kpi_col3:
-        st.metric("Dumb Baseline Cost", _format_currency_uah(dumb_baseline_cost))
+        st.metric("Dumb Baseline Cost", _format_currency_uah(baseline_cost))
     with kpi_col4:
         st.metric(
             "💰 Money Saved",
-            _format_currency_uah(money_saved, signed=True),
+            _format_currency_uah(abs(money_saved)),
             delta=_format_currency_uah(money_saved, signed=True),
             delta_color="normal",
         )
@@ -333,7 +333,7 @@ def main() -> None:
         scenario=demo_scenario,
         smart_route=result,
         baseline_route=baseline_route,
-        baseline_cost=dumb_baseline_cost,
+        baseline_cost=baseline_cost,
         money_saved=money_saved,
     ):
         st.write(f"- {item}")
