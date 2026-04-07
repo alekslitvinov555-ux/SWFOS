@@ -14,13 +14,14 @@ class TestGraphBuilder(unittest.TestCase):
 
         graph = build_graph(stations, edges)
 
-        self.assertEqual(len(graph.nodes), 15)
+        self.assertEqual(len(graph.nodes), 16)
         self.assertIn("Kryvyi Rih", graph.nodes)
         self.assertIn("Odesa-Sortuvalna", graph.nodes)
+        self.assertIn("Chornomorsk-Bypass", graph.nodes)
         self.assertIn("Izmail", graph.nodes)
         self.assertEqual(graph.nodes["Kryvyi Rih"]["available_locomotives"], 5)
         self.assertEqual(graph.nodes["Odesa-Sortuvalna"]["available_locomotives"], 0)
-        self.assertEqual(len(graph.edges), 28)
+        self.assertEqual(len(graph.edges), 32)
 
         forward_waypoints = graph["Odesa-Sortuvalna"]["Bilhorod-Dnistrovskyi"]["waypoints"]
         reverse_waypoints = graph["Bilhorod-Dnistrovskyi"]["Odesa-Sortuvalna"]["waypoints"]

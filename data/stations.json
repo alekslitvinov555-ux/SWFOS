@@ -88,6 +88,14 @@
     "available_locomotives": 5
   },
   {
+    "name": "Chornomorsk-Bypass",
+    "capacity": 85,
+    "current_load": 24,
+    "lat": 46.76,
+    "lon": 30.9,
+    "available_locomotives": 5
+  },
+  {
     "name": "Chornomorsk",
     "capacity": 95,
     "current_load": 55,

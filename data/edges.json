@@ -660,6 +660,66 @@
     "bidirectional": true
   },
   {
+    "source": "Kolosivka",
+    "target": "Chornomorsk-Bypass",
+    "base_time": 2.9,
+    "max_capacity": 72,
+    "current_flow": 24,
+    "waypoints": [
+      [
+        47.29,
+        31.02
+      ],
+      [
+        47.13,
+        30.99
+      ],
+      [
+        46.99,
+        30.96
+      ],
+      [
+        46.87,
+        30.93
+      ],
+      [
+        46.76,
+        30.9
+      ]
+    ],
+    "bidirectional": true
+  },
+  {
+    "source": "Chornomorsk-Bypass",
+    "target": "Odesa-Port",
+    "base_time": 2.1,
+    "max_capacity": 68,
+    "current_flow": 20,
+    "waypoints": [
+      [
+        46.76,
+        30.9
+      ],
+      [
+        46.69,
+        30.86
+      ],
+      [
+        46.63,
+        30.83
+      ],
+      [
+        46.56,
+        30.79
+      ],
+      [
+        46.49,
+        30.74
+      ]
+    ],
+    "bidirectional": true
+  },
+  {
     "source": "Odesa-Sortuvalna",
     "target": "Odesa-Port",
     "base_time": 0.6,

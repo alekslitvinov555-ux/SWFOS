@@ -1,9 +1,12 @@
 from __future__ import annotations
 
 import unittest
+from pathlib import Path
 
 import networkx as nx
 
+from app import _apply_demo_scenario
+from src.graph_builder import build_graph
 from src.routing import calculate_route_cost, find_optimal_route, find_shortest_distance_route
 
 
@@ -79,6 +82,16 @@ class TestRouting(unittest.TestCase):
         self.assertGreater(with_given_time, 0)
         self.assertGreater(with_derived_time, 0)
         self.assertNotEqual(with_given_time, with_derived_time)
+
+    def test_odessa_bottleneck_prefers_bypass_route(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        graph = build_graph(project_root / "data" / "stations.json", project_root / "data" / "edges.json")
+
+        _apply_demo_scenario(graph, "Odesa Bottleneck")
+        result = find_optimal_route(graph, source="Kolosivka", target="Odesa-Port")
+
+        self.assertIn("Chornomorsk-Bypass", result.path)
+        self.assertNotIn("Odesa-Sortuvalna", result.path)
 
 
 if __name__ == "__main__":
