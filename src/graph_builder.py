@@ -44,6 +44,7 @@ def build_graph(stations_path: str | Path, edges_path: str | Path) -> nx.DiGraph
             station["name"],
             capacity=float(station["capacity"]),
             current_load=float(station["current_load"]),
+            available_locomotives=int(station.get("available_locomotives", 5)),
             lat=float(station["lat"]),
             lon=float(station["lon"]),
         )
