@@ -16,10 +16,10 @@ class TestRouting(unittest.TestCase):
         """
         g = nx.DiGraph()
 
-        g.add_node("A", capacity=100, current_load=10, lat=0.0, lon=0.0)
-        g.add_node("B", capacity=100, current_load=20, available_locomotives=5, lat=0.0, lon=1.0)
-        g.add_node("C", capacity=100, current_load=20, lat=1.0, lon=0.0)
-        g.add_node("D", capacity=100, current_load=20, lat=1.0, lon=1.0)
+        g.add_node("A", capacity=100, current_load=10, available_locomotives=5, lat=0.0, lon=0.0)
+        g.add_node("B", capacity=100, current_load=20, available_locomotives=5, lat=0.0, lon=0.2)
+        g.add_node("C", capacity=100, current_load=20, available_locomotives=5, lat=0.8, lon=0.0)
+        g.add_node("D", capacity=100, current_load=20, available_locomotives=5, lat=1.0, lon=1.0)
 
         g.add_edge("A", "B", base_time=1.0, max_capacity=100, current_flow=10)
         g.add_edge("B", "D", base_time=1.0, max_capacity=100, current_flow=10)
@@ -45,6 +45,8 @@ class TestRouting(unittest.TestCase):
 
         # Overload B above 90% to trigger strong station penalty.
         graph.nodes["B"]["current_load"] = 95
+        graph["A"]["B"]["current_flow"] = graph["A"]["B"]["max_capacity"]
+        graph["B"]["D"]["current_flow"] = graph["B"]["D"]["max_capacity"]
 
         result = find_optimal_route(graph, source="A", target="D")
 
@@ -64,7 +66,7 @@ class TestRouting(unittest.TestCase):
 
         baseline = find_shortest_distance_route(graph, source="A", target="D")
 
-        self.assertIn(baseline.path, (["A", "B", "D"], ["A", "C", "D"]))
+        self.assertEqual(baseline.path, ["A", "B", "D"])
         self.assertGreater(baseline.total_cost, 0)
 
     def test_calculate_route_cost_uses_given_time(self) -> None:

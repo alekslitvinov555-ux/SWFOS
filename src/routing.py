@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import math
+import warnings
 
 import networkx as nx
 
 DELAY_PENALTY_PER_HOUR = 3000.0
 OPERATING_COST_PER_KM = 300.0
 ZERO_LOCO_WAIT_HOURS = 12.0
+DEFAULT_AVAILABLE_LOCOMOTIVES = 5
 
 
 @dataclass
@@ -58,14 +60,21 @@ def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     phi2 = math.radians(lat2)
     dphi = math.radians(lat2 - lat1)
     dlambda = math.radians(lon2 - lon1)
-    q = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
-    return 2 * r * math.atan2(math.sqrt(q), math.sqrt(1 - q))
+    haversine_a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return 2 * r * math.atan2(math.sqrt(haversine_a), math.sqrt(1 - haversine_a))
 
 
-def _edge_distance_km(graph: nx.DiGraph, u: str, v: str, edge_data: dict) -> float:
+def _route_segment_distance_km(graph: nx.DiGraph, u: str, v: str, edge_data: dict) -> float:
     waypoints = edge_data.get("waypoints", []) or []
     points = [[float(graph.nodes[u]["lat"]), float(graph.nodes[u]["lon"])]]
-    points.extend([[float(p[0]), float(p[1])] for p in waypoints if len(p) >= 2])
+    for idx, point in enumerate(waypoints):
+        if not isinstance(point, (list, tuple)) or len(point) < 2:
+            warnings.warn(
+                f"Invalid waypoint at edge {u}->{v} index={idx}; expected [lat, lon], got {point!r}",
+                stacklevel=3,
+            )
+            continue
+        points.append([float(point[0]), float(point[1])])
     points.append([float(graph.nodes[v]["lat"]), float(graph.nodes[v]["lon"])])
 
     distance_km = 0.0
@@ -82,7 +91,7 @@ def _segment_time_hours(graph: nx.DiGraph, v: str, edge_data: dict) -> float:
     destination_data = graph.nodes[v]
     node_capacity = float(destination_data.get("capacity", 1.0))
     node_load = float(destination_data.get("current_load", 0.0))
-    available_locomotives = int(destination_data.get("available_locomotives", 5))
+    available_locomotives = int(destination_data.get("available_locomotives", DEFAULT_AVAILABLE_LOCOMOTIVES))
 
     congestion_penalty = base_time * (
         _edge_penalty(edge_capacity, edge_flow) + _station_penalty(node_capacity, node_load)
@@ -102,14 +111,16 @@ def calculate_route_cost(
     if time_hours is None:
         time_hours = sum(_segment_time_hours(graph, v, graph[u][v]) for u, v in zip(route[:-1], route[1:]))
 
-    distance_km = sum(_edge_distance_km(graph, u, v, graph[u][v]) for u, v in zip(route[:-1], route[1:]))
+    distance_km = sum(
+        _route_segment_distance_km(graph, u, v, graph[u][v]) for u, v in zip(route[:-1], route[1:])
+    )
     return time_hours * DELAY_PENALTY_PER_HOUR + distance_km * OPERATING_COST_PER_KM
 
 
 def make_edge_cost_function(graph: nx.DiGraph):
     def edge_cost(u: str, v: str, edge_data: dict) -> float:
         segment_time = _segment_time_hours(graph, v, edge_data)
-        segment_distance_km = _edge_distance_km(graph, u, v, edge_data)
+        segment_distance_km = _route_segment_distance_km(graph, u, v, edge_data)
         return segment_time * DELAY_PENALTY_PER_HOUR + segment_distance_km * OPERATING_COST_PER_KM
 
     return edge_cost
@@ -121,7 +132,9 @@ def find_optimal_route(graph: nx.DiGraph, source: str, target: str) -> RouteResu
     """
     path = nx.dijkstra_path(graph, source=source, target=target, weight=make_edge_cost_function(graph))
     segment_times_hours = [_segment_time_hours(graph, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])]
-    segment_distances_km = [_edge_distance_km(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])]
+    segment_distances_km = [
+        _route_segment_distance_km(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])
+    ]
     segment_costs = [
         t * DELAY_PENALTY_PER_HOUR + d * OPERATING_COST_PER_KM
         for t, d in zip(segment_times_hours, segment_distances_km)
@@ -141,15 +154,18 @@ def find_optimal_route(graph: nx.DiGraph, source: str, target: str) -> RouteResu
 def find_shortest_distance_route(graph: nx.DiGraph, source: str, target: str) -> RouteResult:
     """
     Baseline route: shortest geometric distance, ignoring congestion and locomotive availability.
+    This intentionally simulates legacy dispatcher logic for KPI comparison.
     """
     path = nx.dijkstra_path(
         graph,
         source=source,
         target=target,
-        weight=lambda u, v, edge_data: _edge_distance_km(graph, u, v, edge_data),
+        weight=lambda u, v, edge_data: _route_segment_distance_km(graph, u, v, edge_data),
     )
     segment_times_hours = [float(graph[u][v].get("base_time", 1.0)) for u, v in zip(path[:-1], path[1:])]
-    segment_distances_km = [_edge_distance_km(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])]
+    segment_distances_km = [
+        _route_segment_distance_km(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])
+    ]
     segment_costs = [
         t * DELAY_PENALTY_PER_HOUR + d * OPERATING_COST_PER_KM
         for t, d in zip(segment_times_hours, segment_distances_km)
