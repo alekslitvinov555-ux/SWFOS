@@ -26,12 +26,12 @@ DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck")
 
 
 def _maybe_clear_streamlit_cache() -> None:
-    st.sidebar.subheader("Data Refresh")
-    if st.sidebar.button("Reload graph from JSON (clear cache)"):
-        st.cache_data.clear()
-        st.cache_resource.clear()
-        st.sidebar.success("Cache cleared. Reloading fresh graph data...")
-        st.rerun()
+    with st.sidebar.expander("Data Refresh", expanded=False):
+        if st.button("Reload graph from JSON (clear cache)", use_container_width=True):
+            st.cache_data.clear()
+            st.cache_resource.clear()
+            st.success("Cache cleared. Reloading fresh graph data...")
+            st.rerun()
 
 
 def _extract_edge_data(graph, u: str, v: str) -> dict:
@@ -157,21 +157,20 @@ def _build_event_log(
 
 
 def _apply_sidebar_station_load_controls(graph) -> None:
-    st.sidebar.header("Simulation Controls: Station Loads")
+    with st.sidebar.expander("Simulation Controls: Station Loads", expanded=False):
+        for station in sorted(graph.nodes):
+            attrs = graph.nodes[station]
+            capacity = int(float(attrs.get("capacity", 0)))
+            current_load = int(float(attrs.get("current_load", 0)))
 
-    for station in sorted(graph.nodes):
-        attrs = graph.nodes[station]
-        capacity = int(float(attrs.get("capacity", 0)))
-        current_load = int(float(attrs.get("current_load", 0)))
-
-        updated_load = st.sidebar.slider(
-            label=f"{station} current_load",
-            min_value=0,
-            max_value=capacity,
-            value=min(current_load, capacity),
-            step=1,
-        )
-        graph.nodes[station]["current_load"] = float(updated_load)
+            updated_load = st.slider(
+                label=f"{station} current_load",
+                min_value=0,
+                max_value=capacity,
+                value=min(current_load, capacity),
+                step=1,
+            )
+            graph.nodes[station]["current_load"] = float(updated_load)
 
 
 def _build_map(graph, route: list[str]) -> folium.Map:
@@ -262,27 +261,28 @@ def _build_map(graph, route: list[str]) -> folium.Map:
 
 def main() -> None:
     st.set_page_config(page_title="Dispatcher Dashboard | Smart Wagon Flow", layout="wide")
-    st.title("🚦 Dispatcher Dashboard — Smart Wagon Flow Optimization")
-    st.caption("Ukrainian Railway MVP: congestion-aware wagon flow routing")
+    st.title("Dispatcher Dashboard")
+    st.caption("Smart Wagon Flow Optimization • Ukrainian Railway MVP")
+    st.divider()
 
     _maybe_clear_streamlit_cache()
-    st.sidebar.divider()
 
     graph = build_graph(DATA_DIR / "stations.json", DATA_DIR / "edges.json")
-    demo_scenario = st.sidebar.selectbox("Demo Scenarios", DEMO_SCENARIOS, index=0)
+    with st.sidebar.expander("Scenario Settings", expanded=True):
+        demo_scenario = st.selectbox("Demo Scenarios", DEMO_SCENARIOS, index=0)
     _apply_demo_scenario(graph, demo_scenario)
-
     _apply_sidebar_station_load_controls(graph)
-    st.sidebar.divider()
 
     stations = sorted(graph.nodes)
-    col1, col2 = st.columns(2)
+    with st.container():
+        st.subheader("Route Settings")
+        selector_col1, selector_col2 = st.columns(2)
 
-    with col1:
-        source = st.selectbox("Source station", stations, index=0)
-    with col2:
-        default_target = stations.index("Izmail") if "Izmail" in stations else len(stations) - 1
-        target = st.selectbox("Target station", stations, index=default_target)
+        with selector_col1:
+            source = st.selectbox("Source station", stations, index=0)
+        with selector_col2:
+            default_target = stations.index("Izmail") if "Izmail" in stations else len(stations) - 1
+            target = st.selectbox("Target station", stations, index=default_target)
 
     if source == target:
         st.warning("Please choose different source and target stations.")
@@ -298,45 +298,54 @@ def main() -> None:
     baseline_cost = calculate_route_cost(graph, baseline_route.path)
     money_saved = baseline_cost - result.total_cost
 
+    st.subheader("KPI Overview")
     kpi_col1, kpi_col2, kpi_col3, kpi_col4 = st.columns(4)
     with kpi_col1:
         st.metric("Total Route Time", _format_time(result.total_time_hours))
     with kpi_col2:
         st.metric("Smart Route Cost", _format_currency_uah(result.total_cost))
     with kpi_col3:
-        st.metric("Dumb Baseline Cost", _format_currency_uah(baseline_cost))
+        st.metric("Baseline Route Cost", _format_currency_uah(baseline_cost))
     with kpi_col4:
         st.metric(
-            "💰 Money Saved",
+            "Money Saved",
             _format_currency_uah(abs(money_saved)),
             delta=_format_currency_uah(money_saved, signed=True),
             delta_color="normal",
         )
 
-    st.subheader("Optimal Route")
-    st.write(" ➜ ".join(result.path))
-    st.caption(f"Baseline (Shortest-Distance): {' ➜ '.join(baseline_route.path)}")
+    st.divider()
+    route_col, baseline_col = st.columns(2)
+    with route_col:
+        st.subheader("Optimal Route")
+        st.write(" ➜ ".join(result.path))
+    with baseline_col:
+        st.subheader("Baseline Route")
+        st.caption("Shortest-Distance Benchmark")
+        st.write(" ➜ ".join(baseline_route.path))
 
-    route_map = _build_map(graph, result.path)
-    st.subheader("Route Map")
-    st_folium(
-        route_map,
-        width=800,
-        height=620,
-        returned_objects=[],
-        use_container_width=True,
-    )
-
-    st.subheader("Enterprise Event Log")
-    for item in _build_event_log(
+    event_log_items = _build_event_log(
         graph=graph,
         scenario=demo_scenario,
         smart_route=result,
         baseline_route=baseline_route,
         baseline_cost=baseline_cost,
         money_saved=money_saved,
-    ):
-        st.write(f"- {item}")
+    )
+
+    route_map = _build_map(graph, result.path)
+    map_tab, log_tab = st.tabs(["Route Map", "Enterprise Event Log"])
+    with map_tab:
+        st_folium(
+            route_map,
+            width=800,
+            height=620,
+            returned_objects=[],
+            use_container_width=True,
+        )
+    with log_tab:
+        for item in event_log_items:
+            st.write(f"- {item}")
 
 
 if __name__ == "__main__":
