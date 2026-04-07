@@ -31,6 +31,9 @@ MOCK_WAITING_TRAINS_RATIO = 0.15
 MOCK_MIN_WAITING_TRAINS = 1
 MOCK_BASE_DELAY_HOURS = 4
 MOCK_UTILIZATION_DELAY_MULTIPLIER = 3
+NETWORK_TRACK_STYLE = {"color": "#666666", "weight": 1.8, "opacity": 0.35}
+ROUTE_GLOW_STYLE = {"color": "#34f5ff", "weight": 10, "opacity": 0.25}
+ROUTE_CORE_STYLE = {"color": "#20ffd5", "weight": 6, "opacity": 0.9}
 
 
 def _maybe_clear_streamlit_cache() -> None:
@@ -141,6 +144,7 @@ def _render_station_analytics(graph: nx.DiGraph, station: str) -> None:
         MOCK_MIN_WAITING_TRAINS,
         int(round(float(attrs.get("current_load", 0)) * MOCK_WAITING_TRAINS_RATIO)),
     )
+    # Mock delay output in whole hours for a clear dispatcher-style KPI readout.
     estimated_delay_hours = MOCK_BASE_DELAY_HOURS + int(
         round(utilization * MOCK_UTILIZATION_DELAY_MULTIPLIER)
     )
@@ -271,16 +275,14 @@ def _build_map(graph, route: list[str]) -> folium.Map:
 
     optimized_tracks = _load_optimized_tracks(str(OPTIMIZED_TRACKS_PATH))
 
+    def _draw_network_segment(segment_coords: list[list[float]], group: folium.FeatureGroup) -> None:
+        folium.PolyLine(locations=segment_coords, **NETWORK_TRACK_STYLE).add_to(group)
+
     if optimized_tracks:
         network_group = folium.FeatureGroup(name="Optimized Rail Network", overlay=True, control=True)
 
         for segment in optimized_tracks.get("network_segments", []):
-            folium.PolyLine(
-                locations=segment,
-                color="#666666",
-                weight=1.8,
-                opacity=0.35,
-            ).add_to(network_group)
+            _draw_network_segment(segment, network_group)
 
         network_group.add_to(m)
     else:
@@ -291,12 +293,7 @@ def _build_map(graph, route: list[str]) -> folium.Map:
             edge_data = _extract_edge_data(graph, u, v)
             edge_wps = edge_data.get("waypoints", [])
             segment_coords = [start_node_coords] + edge_wps + [end_node_coords]
-            folium.PolyLine(
-                locations=segment_coords,
-                color="#666666",
-                weight=1.8,
-                opacity=0.35,
-            ).add_to(network_group)
+            _draw_network_segment(segment_coords, network_group)
         network_group.add_to(m)
 
     for node, attrs in graph.nodes(data=True):
@@ -338,17 +335,13 @@ def _build_map(graph, route: list[str]) -> folium.Map:
 
         folium.PolyLine(
             locations=segment_coords,
-            color="#34f5ff",
-            weight=10,
-            opacity=0.25,
+            **ROUTE_GLOW_STYLE,
             tooltip=f"Optimized route: {u} -> {v}",
         ).add_to(m)
 
         folium.PolyLine(
             locations=segment_coords,
-            color="#20ffd5",
-            weight=6,
-            opacity=0.9,
+            **ROUTE_CORE_STYLE,
             tooltip=f"Optimized route: {u} -> {v}",
         ).add_to(m)
 
