@@ -93,6 +93,24 @@ def _segment_from_optimized(
     return None
 
 
+def _segment_coordinates(
+    graph: nx.DiGraph,
+    u: str,
+    v: str,
+    optimized_tracks: dict | None = None,
+    prefer_optimized: bool = False,
+) -> list[list[float]]:
+    start_node_coords = [float(graph.nodes[u]["lat"]), float(graph.nodes[u]["lon"])]
+    end_node_coords = [float(graph.nodes[v]["lat"]), float(graph.nodes[v]["lon"])]
+    if prefer_optimized:
+        segment_coords = _segment_from_optimized(optimized_tracks, u, v)
+        if segment_coords:
+            return segment_coords
+    edge_data = _extract_edge_data(graph, u, v)
+    edge_wps = edge_data.get("waypoints", [])
+    return [start_node_coords] + edge_wps + [end_node_coords]
+
+
 def _utilization(attrs: dict) -> float:
     capacity = float(attrs.get("capacity", 0))
     current_load = float(attrs.get("current_load", 0))
@@ -123,7 +141,7 @@ def _resolve_clicked_station(graph: nx.DiGraph, click_data: dict | None) -> str 
 
     def _distance_sq_scaled(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
         mean_lat_rad = math.radians((lat1 + lat2) / 2.0)
-        # Guardrail avoids near-zero longitude scaling at extreme latitudes.
+        # Guardrail keeps longitudinal scaling stable at high latitudes (avoids overly permissive clicks).
         lon_scale = max(MIN_LONGITUDE_SCALE, abs(math.cos(mean_lat_rad)))
         lat_delta = lat1 - lat2
         lon_delta = (lon1 - lon2) * lon_scale
@@ -300,11 +318,7 @@ def _build_map(graph, route: list[str]) -> folium.Map:
     else:
         network_group = folium.FeatureGroup(name="Rail Network", overlay=True, control=True)
         for u, v in graph.edges():
-            start_node_coords = [float(graph.nodes[u]["lat"]), float(graph.nodes[u]["lon"])]
-            end_node_coords = [float(graph.nodes[v]["lat"]), float(graph.nodes[v]["lon"])]
-            edge_data = _extract_edge_data(graph, u, v)
-            edge_wps = edge_data.get("waypoints", [])
-            segment_coords = [start_node_coords] + edge_wps + [end_node_coords]
+            segment_coords = _segment_coordinates(graph, u, v)
             _draw_network_segment(segment_coords, network_group)
         network_group.add_to(m)
 
@@ -337,13 +351,7 @@ def _build_map(graph, route: list[str]) -> folium.Map:
         u = route[i]
         v = route[i + 1]
 
-        start_node_coords = [float(graph.nodes[u]["lat"]), float(graph.nodes[u]["lon"])]
-        end_node_coords = [float(graph.nodes[v]["lat"]), float(graph.nodes[v]["lon"])]
-        segment_coords = _segment_from_optimized(optimized_tracks, u, v)
-        if not segment_coords:
-            edge_data = _extract_edge_data(graph, u, v)
-            edge_wps = edge_data.get("waypoints", [])
-            segment_coords = [start_node_coords] + edge_wps + [end_node_coords]
+        segment_coords = _segment_coordinates(graph, u, v, optimized_tracks, prefer_optimized=True)
 
         folium.PolyLine(
             locations=segment_coords,
