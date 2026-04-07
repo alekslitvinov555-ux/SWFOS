@@ -305,7 +305,7 @@ def main() -> None:
     with kpi_col2:
         st.metric("Smart Route Cost", _format_currency_uah(result.total_cost))
     with kpi_col3:
-        st.metric("Baseline Cost", _format_currency_uah(baseline_cost))
+        st.metric("Baseline Route Cost", _format_currency_uah(baseline_cost))
     with kpi_col4:
         st.metric(
             "Money Saved",
