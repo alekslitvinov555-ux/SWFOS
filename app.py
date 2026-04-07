@@ -23,7 +23,9 @@ DATA_DIR = BASE_DIR / "data"
 OPTIMIZED_TRACKS_PATH = DATA_DIR / "optimized_tracks.json"
 ODESSA_SORT_STATION = "Odesa-Sortuvalna"
 DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck")
+# Approximate click snap radius (in lat/lon degrees) to map a click to the nearest station marker.
 MAX_STATION_CLICK_DISTANCE_DEGREES = 0.03
+# Mock station analytics defaults used until live dispatcher telemetry is integrated.
 DEFAULT_STATION_TRACK_CAPACITY = 10
 MOCK_WAITING_TRAINS_RATIO = 0.15
 MOCK_MIN_WAITING_TRAINS = 1
@@ -139,7 +141,9 @@ def _render_station_analytics(graph: nx.DiGraph, station: str) -> None:
         MOCK_MIN_WAITING_TRAINS,
         int(round(float(attrs.get("current_load", 0)) * MOCK_WAITING_TRAINS_RATIO)),
     )
-    avg_delay_hours = MOCK_BASE_DELAY_HOURS + int(round(utilization * MOCK_UTILIZATION_DELAY_MULTIPLIER))
+    estimated_delay_hours = MOCK_BASE_DELAY_HOURS + int(
+        round(utilization * MOCK_UTILIZATION_DELAY_MULTIPLIER)
+    )
     status_color, status_label = _station_congestion_style(attrs)
 
     with st.sidebar.expander("Station Analytics Dashboard", expanded=True):
@@ -154,7 +158,7 @@ def _render_station_analytics(graph: nx.DiGraph, station: str) -> None:
             st.metric("Available Locomotives", available_locomotives)
         with stat_col2:
             st.metric("Available Tracks", f"{available_tracks}/{max_tracks}")
-            st.metric("Avg Delay", f"{avg_delay_hours} hours")
+            st.metric("Avg Delay", f"{estimated_delay_hours} hours")
 
 
 def _format_time(hours: float) -> str:
