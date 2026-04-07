@@ -23,6 +23,12 @@ DATA_DIR = BASE_DIR / "data"
 OPTIMIZED_TRACKS_PATH = DATA_DIR / "optimized_tracks.json"
 ODESSA_SORT_STATION = "Odesa-Sortuvalna"
 DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck")
+MAX_STATION_CLICK_DISTANCE_DEGREES = 0.03
+DEFAULT_STATION_TRACK_CAPACITY = 10
+MOCK_WAITING_TRAINS_RATIO = 0.15
+MOCK_MIN_WAITING_TRAINS = 1
+MOCK_BASE_DELAY_HOURS = 4
+MOCK_UTILIZATION_DELAY_MULTIPLIER = 3
 
 
 def _maybe_clear_streamlit_cache() -> None:
@@ -115,7 +121,7 @@ def _resolve_clicked_station(graph: nx.DiGraph, click_data: dict | None) -> str 
             nearest_distance = distance
             nearest_station = station
 
-    max_click_distance_sq = 0.03**2
+    max_click_distance_sq = MAX_STATION_CLICK_DISTANCE_DEGREES**2
     if nearest_distance > max_click_distance_sq:
         return None
     return nearest_station
@@ -126,11 +132,14 @@ def _render_station_analytics(graph: nx.DiGraph, station: str) -> None:
     utilization = _utilization(attrs)
     available_locomotives = int(attrs.get("available_locomotives", 0))
 
-    max_tracks = 10
+    max_tracks = int(attrs.get("max_tracks", DEFAULT_STATION_TRACK_CAPACITY))
     used_tracks = min(max_tracks, max(0, int(round(utilization * max_tracks))))
     available_tracks = max_tracks - used_tracks
-    trains_waiting = max(1, int(round(float(attrs.get("current_load", 0)) * 0.15)))
-    avg_delay_hours = 4 + int(round(utilization * 3))
+    trains_waiting = max(
+        MOCK_MIN_WAITING_TRAINS,
+        int(round(float(attrs.get("current_load", 0)) * MOCK_WAITING_TRAINS_RATIO)),
+    )
+    avg_delay_hours = MOCK_BASE_DELAY_HOURS + int(round(utilization * MOCK_UTILIZATION_DELAY_MULTIPLIER))
     status_color, status_label = _station_congestion_style(attrs)
 
     with st.sidebar.expander("Station Analytics Dashboard", expanded=True):
