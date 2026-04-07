@@ -9,7 +9,9 @@ import networkx as nx
 DELAY_PENALTY_PER_HOUR = 3000.0
 OPERATING_COST_PER_KM = 300.0
 ZERO_LOCO_WAIT_HOURS = 12.0
+AC_DC_SWITCH_PENALTY_HOURS = 2.0
 DEFAULT_AVAILABLE_LOCOMOTIVES = 5
+TRACK_SPEEDS_KMH = {"single": 45.0, "double": 65.0}
 
 
 @dataclass
@@ -83,8 +85,15 @@ def _route_segment_distance_km(graph: nx.DiGraph, u: str, v: str, edge_data: dic
     return distance_km
 
 
-def _segment_time_hours(graph: nx.DiGraph, v: str, edge_data: dict) -> float:
-    base_time = float(edge_data.get("base_time", 1.0))
+def _segment_base_time_hours(graph: nx.DiGraph, u: str, v: str, edge_data: dict) -> float:
+    track_type = str(edge_data.get("track_type", "double")).lower()
+    speed_kmh = TRACK_SPEEDS_KMH.get(track_type, TRACK_SPEEDS_KMH["double"])
+    distance_km = _route_segment_distance_km(graph, u, v, edge_data)
+    return distance_km / speed_kmh if speed_kmh > 0 else distance_km
+
+
+def _segment_time_hours(graph: nx.DiGraph, u: str, v: str, edge_data: dict) -> float:
+    base_time = _segment_base_time_hours(graph, u, v, edge_data)
     edge_capacity = float(edge_data.get("max_capacity", 1.0))
     edge_flow = float(edge_data.get("current_flow", 0.0))
 
@@ -92,12 +101,15 @@ def _segment_time_hours(graph: nx.DiGraph, v: str, edge_data: dict) -> float:
     node_capacity = float(destination_data.get("capacity", 1.0))
     node_load = float(destination_data.get("current_load", 0.0))
     available_locomotives = int(destination_data.get("available_locomotives", DEFAULT_AVAILABLE_LOCOMOTIVES))
+    is_ac_dc_switch = bool(destination_data.get("is_ac_dc_switch", False))
+    disruption_penalty_hours = float(edge_data.get("disruption_penalty_hours", 0.0))
 
     congestion_penalty = base_time * (
         _edge_penalty(edge_capacity, edge_flow) + _station_penalty(node_capacity, node_load)
     )
     loco_wait_time = ZERO_LOCO_WAIT_HOURS if available_locomotives <= 0 else 0.0
-    return base_time + congestion_penalty + loco_wait_time
+    ac_dc_switch_penalty = AC_DC_SWITCH_PENALTY_HOURS if is_ac_dc_switch else 0.0
+    return base_time + congestion_penalty + loco_wait_time + ac_dc_switch_penalty + disruption_penalty_hours
 
 
 def calculate_route_cost(
@@ -109,7 +121,7 @@ def calculate_route_cost(
         return 0.0
 
     if time_hours is None:
-        time_hours = sum(_segment_time_hours(graph, v, graph[u][v]) for u, v in zip(route[:-1], route[1:]))
+        time_hours = sum(_segment_time_hours(graph, u, v, graph[u][v]) for u, v in zip(route[:-1], route[1:]))
 
     distance_km = sum(
         _route_segment_distance_km(graph, u, v, graph[u][v]) for u, v in zip(route[:-1], route[1:])
@@ -119,7 +131,7 @@ def calculate_route_cost(
 
 def make_edge_cost_function(graph: nx.DiGraph):
     def edge_cost(u: str, v: str, edge_data: dict) -> float:
-        segment_time = _segment_time_hours(graph, v, edge_data)
+        segment_time = _segment_time_hours(graph, u, v, edge_data)
         segment_distance_km = _route_segment_distance_km(graph, u, v, edge_data)
         return segment_time * DELAY_PENALTY_PER_HOUR + segment_distance_km * OPERATING_COST_PER_KM
 
@@ -131,7 +143,7 @@ def find_optimal_route(graph: nx.DiGraph, source: str, target: str) -> RouteResu
     Find the lowest-cost economic route using Dijkstra.
     """
     path = nx.dijkstra_path(graph, source=source, target=target, weight=make_edge_cost_function(graph))
-    segment_times_hours = [_segment_time_hours(graph, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])]
+    segment_times_hours = [_segment_time_hours(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])]
     segment_distances_km = [
         _route_segment_distance_km(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])
     ]
@@ -162,7 +174,9 @@ def find_shortest_distance_route(graph: nx.DiGraph, source: str, target: str) ->
         target=target,
         weight=lambda u, v, edge_data: _route_segment_distance_km(graph, u, v, edge_data),
     )
-    segment_times_hours = [float(graph[u][v].get("base_time", 1.0)) for u, v in zip(path[:-1], path[1:])]
+    segment_times_hours = [
+        _segment_base_time_hours(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])
+    ]
     segment_distances_km = [
         _route_segment_distance_km(graph, u, v, graph[u][v]) for u, v in zip(path[:-1], path[1:])
     ]

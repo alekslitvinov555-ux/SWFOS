@@ -14,22 +14,26 @@ class TestGraphBuilder(unittest.TestCase):
 
         graph = build_graph(stations, edges)
 
-        self.assertEqual(len(graph.nodes), 16)
+        self.assertEqual(len(graph.nodes), 14)
         self.assertIn("Kryvyi Rih", graph.nodes)
+        self.assertIn("Tymkove", graph.nodes)
+        self.assertIn("Kropyvnytska", graph.nodes)
+        self.assertIn("Dnipro", graph.nodes)
+        self.assertIn("Pyatykhatky", graph.nodes)
+        self.assertIn("Odesa-Skhidna", graph.nodes)
+        self.assertIn("Kulyndorove", graph.nodes)
+        self.assertIn("Borshchivka", graph.nodes)
         self.assertIn("Odesa-Sortuvalna", graph.nodes)
-        self.assertIn("Chornomorsk-Bypass", graph.nodes)
-        self.assertIn("Izmail", graph.nodes)
         self.assertEqual(graph.nodes["Kryvyi Rih"]["available_locomotives"], 5)
+        self.assertTrue(graph.nodes["Tymkove"]["is_ac_dc_switch"])
+        self.assertTrue(graph.nodes["Pyatykhatky"]["is_ac_dc_switch"])
         self.assertEqual(graph.nodes["Odesa-Sortuvalna"]["available_locomotives"], 0)
         self.assertEqual(len(graph.edges), 32)
 
-        forward_waypoints = graph["Odesa-Sortuvalna"]["Bilhorod-Dnistrovskyi"]["waypoints"]
-        reverse_waypoints = graph["Bilhorod-Dnistrovskyi"]["Odesa-Sortuvalna"]["waypoints"]
-
-        self.assertGreaterEqual(len(forward_waypoints), 15)
-        self.assertEqual(forward_waypoints[0], [46.53, 30.77])
-        self.assertEqual(forward_waypoints[-1], [46.19, 30.35])
-        self.assertEqual(reverse_waypoints, list(reversed(forward_waypoints)))
+        self.assertEqual(graph["Kryvyi Rih"]["Tymkove"]["track_type"], "double")
+        self.assertEqual(graph["Tymkove"]["Kropyvnytska"]["track_type"], "single")
+        self.assertEqual(graph["Odesa-Skhidna"]["Kulyndorove"]["track_type"], "single")
+        self.assertEqual(graph["Kulyndorove"]["Odesa-Skhidna"]["track_type"], "single")
 
 
 if __name__ == "__main__":

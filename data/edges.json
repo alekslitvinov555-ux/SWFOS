@@ -1,1022 +1,162 @@
 [
   {
     "source": "Kryvyi Rih",
-    "target": "Dolynska",
-    "base_time": 1.7,
-    "max_capacity": 95,
-    "current_flow": 61,
-    "waypoints": [
-      [
-        47.96,
-        33.24
-      ],
-      [
-        48.01,
-        33.1
-      ],
-      [
-        48.03,
-        32.96
-      ],
-      [
-        48.09,
-        32.87
-      ],
-      [
-        48.13,
-        32.8
-      ]
-    ],
+    "target": "Tymkove",
+    "base_time": 2.4,
+    "track_type": "double",
+    "max_capacity": 98,
+    "current_flow": 44,
+    "waypoints": [],
     "bidirectional": true
   },
   {
-    "source": "Dolynska",
-    "target": "Pomichna",
-    "base_time": 1.6,
-    "max_capacity": 88,
+    "source": "Tymkove",
+    "target": "Kropyvnytska",
+    "base_time": 1.9,
+    "track_type": "single",
+    "max_capacity": 82,
+    "current_flow": 39,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Kropyvnytska",
+    "target": "Kolosivka",
+    "base_time": 3.1,
+    "track_type": "double",
+    "max_capacity": 92,
+    "current_flow": 47,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Kolosivka",
+    "target": "Odesa-Skhidna",
+    "base_time": 2.8,
+    "track_type": "double",
+    "max_capacity": 95,
     "current_flow": 53,
-    "waypoints": [
-      [
-        48.15,
-        32.55
-      ],
-      [
-        48.22,
-        32.38
-      ],
-      [
-        48.24,
-        32.14
-      ],
-      [
-        48.23,
-        31.9
-      ],
-      [
-        48.25,
-        31.67
-      ]
-    ],
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Odesa-Skhidna",
+    "target": "Kulyndorove",
+    "base_time": 0.5,
+    "track_type": "single",
+    "max_capacity": 88,
+    "current_flow": 58,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Kulyndorove",
+    "target": "Odesa-Sortuvalna",
+    "base_time": 0.4,
+    "track_type": "double",
+    "max_capacity": 90,
+    "current_flow": 54,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Odesa-Sortuvalna",
+    "target": "Odesa-Port",
+    "base_time": 0.35,
+    "track_type": "double",
+    "max_capacity": 126,
+    "current_flow": 94,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Kulyndorove",
+    "target": "Chornomorsk Port",
+    "base_time": 1.1,
+    "track_type": "single",
+    "max_capacity": 76,
+    "current_flow": 38,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Chornomorsk Port",
+    "target": "Odesa-Port",
+    "base_time": 0.9,
+    "track_type": "double",
+    "max_capacity": 84,
+    "current_flow": 36,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Kolosivka",
+    "target": "Chornomorsk Port",
+    "base_time": 2.3,
+    "track_type": "double",
+    "max_capacity": 83,
+    "current_flow": 31,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Dnipro",
+    "target": "Pyatykhatky",
+    "base_time": 1.7,
+    "track_type": "double",
+    "max_capacity": 104,
+    "current_flow": 57,
+    "waypoints": [],
+    "bidirectional": true
+  },
+  {
+    "source": "Pyatykhatky",
+    "target": "Znamianka",
+    "base_time": 2.1,
+    "track_type": "single",
+    "max_capacity": 89,
+    "current_flow": 42,
+    "waypoints": [],
     "bidirectional": true
   },
   {
     "source": "Znamianka",
-    "target": "Kropyvnytskyi",
-    "base_time": 1.2,
-    "max_capacity": 92,
-    "current_flow": 66,
-    "waypoints": [
-      [
-        48.69,
-        32.63
-      ],
-      [
-        48.66,
-        32.56
-      ],
-      [
-        48.62,
-        32.48
-      ],
-      [
-        48.57,
-        32.4
-      ],
-      [
-        48.53,
-        32.32
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Kropyvnytskyi",
     "target": "Pomichna",
-    "base_time": 1.9,
-    "max_capacity": 86,
-    "current_flow": 57,
-    "waypoints": [
-      [
-        48.49,
-        32.11
-      ],
-      [
-        48.46,
-        31.96
-      ],
-      [
-        48.4,
-        31.8
-      ],
-      [
-        48.35,
-        31.66
-      ],
-      [
-        48.29,
-        31.54
-      ]
-    ],
+    "base_time": 2.5,
+    "track_type": "double",
+    "max_capacity": 93,
+    "current_flow": 45,
+    "waypoints": [],
     "bidirectional": true
   },
   {
     "source": "Pomichna",
     "target": "Kolosivka",
     "base_time": 2.4,
-    "max_capacity": 80,
+    "track_type": "double",
+    "max_capacity": 91,
     "current_flow": 48,
-    "waypoints": [
-      [
-        48.17,
-        31.37
-      ],
-      [
-        48.08,
-        31.36
-      ],
-      [
-        47.95,
-        31.29
-      ],
-      [
-        47.79,
-        31.18
-      ],
-      [
-        47.6,
-        31.09
-      ]
-    ],
+    "waypoints": [],
     "bidirectional": true
   },
   {
     "source": "Pomichna",
-    "target": "Voznesensk",
-    "base_time": 2.8,
-    "max_capacity": 78,
-    "current_flow": 46,
-    "waypoints": [
-      [
-        48.13,
-        31.42
-      ],
-      [
-        48.03,
-        31.44
-      ],
-      [
-        47.9,
-        31.41
-      ],
-      [
-        47.76,
-        31.38
-      ],
-      [
-        47.64,
-        31.34
-      ]
-    ],
+    "target": "Borshchivka",
+    "base_time": 1.7,
+    "track_type": "single",
+    "max_capacity": 75,
+    "current_flow": 35,
+    "waypoints": [],
     "bidirectional": true
   },
   {
-    "source": "Voznesensk",
-    "target": "Kolosivka",
-    "base_time": 1.4,
-    "max_capacity": 74,
-    "current_flow": 41,
-    "waypoints": [
-      [
-        47.52,
-        31.31
-      ],
-      [
-        47.49,
-        31.22
-      ],
-      [
-        47.43,
-        31.14
-      ],
-      [
-        47.36,
-        31.09
-      ],
-      [
-        47.31,
-        31.05
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Kolosivka",
-    "target": "Mykolaiv",
-    "base_time": 2.1,
-    "max_capacity": 96,
-    "current_flow": 68,
-    "waypoints": [
-      [
-        47.29,
-        31.02
-      ],
-      [
-        47.285,
-        31.03
-      ],
-      [
-        47.28,
-        31.04
-      ],
-      [
-        47.275,
-        31.05
-      ],
-      [
-        47.27,
-        31.06
-      ],
-      [
-        47.26375,
-        31.0725
-      ],
-      [
-        47.2575,
-        31.085
-      ],
-      [
-        47.25125,
-        31.0975
-      ],
-      [
-        47.245,
-        31.11
-      ],
-      [
-        47.23875,
-        31.125
-      ],
-      [
-        47.2325,
-        31.14
-      ],
-      [
-        47.22625,
-        31.155
-      ],
-      [
-        47.22,
-        31.17
-      ],
-      [
-        47.215,
-        31.1875
-      ],
-      [
-        47.21,
-        31.205
-      ],
-      [
-        47.205,
-        31.2225
-      ],
-      [
-        47.2,
-        31.24
-      ],
-      [
-        47.19625,
-        31.26
-      ],
-      [
-        47.1925,
-        31.28
-      ],
-      [
-        47.18875,
-        31.3
-      ],
-      [
-        47.185,
-        31.32
-      ],
-      [
-        47.18125,
-        31.34
-      ],
-      [
-        47.1775,
-        31.36
-      ],
-      [
-        47.17375,
-        31.38
-      ],
-      [
-        47.17,
-        31.4
-      ],
-      [
-        47.165,
-        31.4225
-      ],
-      [
-        47.16,
-        31.445
-      ],
-      [
-        47.155,
-        31.4675
-      ],
-      [
-        47.15,
-        31.49
-      ],
-      [
-        47.143333,
-        31.516667
-      ],
-      [
-        47.136667,
-        31.543333
-      ],
-      [
-        47.13,
-        31.57
-      ],
-      [
-        47.123333,
-        31.596667
-      ],
-      [
-        47.116667,
-        31.623333
-      ],
-      [
-        47.11,
-        31.65
-      ],
-      [
-        47.103333,
-        31.673333
-      ],
-      [
-        47.096667,
-        31.696667
-      ],
-      [
-        47.09,
-        31.72
-      ],
-      [
-        47.08,
-        31.743333
-      ],
-      [
-        47.07,
-        31.766667
-      ],
-      [
-        47.06,
-        31.79
-      ],
-      [
-        47.05,
-        31.813333
-      ],
-      [
-        47.04,
-        31.836667
-      ],
-      [
-        47.03,
-        31.86
-      ],
-      [
-        47.02,
-        31.883333
-      ],
-      [
-        47.01,
-        31.906667
-      ],
-      [
-        47.0,
-        31.93
-      ],
-      [
-        46.991667,
-        31.951533
-      ],
-      [
-        46.983333,
-        31.973067
-      ],
-      [
-        46.975,
-        31.9946
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Mykolaiv",
-    "target": "Kherson",
-    "base_time": 1.5,
-    "max_capacity": 104,
-    "current_flow": 72,
-    "waypoints": [
-      [
-        46.94,
-        32.07
-      ],
-      [
-        46.91,
-        32.2
-      ],
-      [
-        46.86,
-        32.33
-      ],
-      [
-        46.79,
-        32.47
-      ],
-      [
-        46.72,
-        32.58
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Kolosivka",
-    "target": "Odesa-Sortuvalna",
-    "base_time": 2.3,
-    "max_capacity": 98,
-    "current_flow": 69,
-    "waypoints": [
-      [
-        46.53,
-        30.77
-      ],
-      [
-        46.5375,
-        30.77125
-      ],
-      [
-        46.545,
-        30.7725
-      ],
-      [
-        46.5525,
-        30.77375
-      ],
-      [
-        46.56,
-        30.775
-      ],
-      [
-        46.57,
-        30.7775
-      ],
-      [
-        46.58,
-        30.78
-      ],
-      [
-        46.59,
-        30.7825
-      ],
-      [
-        46.6,
-        30.785
-      ],
-      [
-        46.6125,
-        30.78875
-      ],
-      [
-        46.625,
-        30.7925
-      ],
-      [
-        46.6375,
-        30.79625
-      ],
-      [
-        46.65,
-        30.8
-      ],
-      [
-        46.6625,
-        30.80375
-      ],
-      [
-        46.675,
-        30.8075
-      ],
-      [
-        46.6875,
-        30.81125
-      ],
-      [
-        46.7,
-        30.815
-      ],
-      [
-        46.715,
-        30.81875
-      ],
-      [
-        46.73,
-        30.8225
-      ],
-      [
-        46.745,
-        30.82625
-      ],
-      [
-        46.76,
-        30.83
-      ],
-      [
-        46.775,
-        30.83375
-      ],
-      [
-        46.79,
-        30.8375
-      ],
-      [
-        46.805,
-        30.84125
-      ],
-      [
-        46.82,
-        30.845
-      ],
-      [
-        46.835,
-        30.84875
-      ],
-      [
-        46.85,
-        30.8525
-      ],
-      [
-        46.865,
-        30.85625
-      ],
-      [
-        46.88,
-        30.86
-      ],
-      [
-        46.903333,
-        30.865
-      ],
-      [
-        46.926667,
-        30.87
-      ],
-      [
-        46.95,
-        30.875
-      ],
-      [
-        46.973333,
-        30.88
-      ],
-      [
-        46.996667,
-        30.885
-      ],
-      [
-        47.02,
-        30.89
-      ],
-      [
-        47.043333,
-        30.896667
-      ],
-      [
-        47.066667,
-        30.903333
-      ],
-      [
-        47.09,
-        30.91
-      ],
-      [
-        47.11,
-        30.92
-      ],
-      [
-        47.13,
-        30.93
-      ],
-      [
-        47.15,
-        30.94
-      ],
-      [
-        47.17,
-        30.95
-      ],
-      [
-        47.19,
-        30.96
-      ],
-      [
-        47.21,
-        30.97
-      ],
-      [
-        47.223333,
-        30.978333
-      ],
-      [
-        47.236667,
-        30.986667
-      ],
-      [
-        47.25,
-        30.995
-      ],
-      [
-        47.263333,
-        31.003333
-      ],
-      [
-        47.276667,
-        31.011667
-      ],
-      [
-        47.29,
-        31.02
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Kolosivka",
-    "target": "Chornomorsk-Bypass",
+    "source": "Borshchivka",
+    "target": "Kulyndorove",
     "base_time": 2.9,
+    "track_type": "single",
     "max_capacity": 72,
-    "current_flow": 24,
-    "waypoints": [
-      [
-        47.29,
-        31.02
-      ],
-      [
-        47.13,
-        30.99
-      ],
-      [
-        46.99,
-        30.96
-      ],
-      [
-        46.87,
-        30.93
-      ],
-      [
-        46.76,
-        30.9
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Chornomorsk-Bypass",
-    "target": "Odesa-Port",
-    "base_time": 2.1,
-    "max_capacity": 68,
-    "current_flow": 20,
-    "waypoints": [
-      [
-        46.76,
-        30.9
-      ],
-      [
-        46.69,
-        30.86
-      ],
-      [
-        46.63,
-        30.83
-      ],
-      [
-        46.56,
-        30.79
-      ],
-      [
-        46.49,
-        30.74
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Odesa-Sortuvalna",
-    "target": "Odesa-Port",
-    "base_time": 0.6,
-    "max_capacity": 130,
-    "current_flow": 102,
-    "waypoints": [
-      [
-        46.524,
-        30.768
-      ],
-      [
-        46.519,
-        30.762
-      ],
-      [
-        46.512,
-        30.756
-      ],
-      [
-        46.503,
-        30.748
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Odesa-Sortuvalna",
-    "target": "Bilhorod-Dnistrovskyi",
-    "base_time": 1.6,
-    "max_capacity": 86,
-    "current_flow": 58,
-    "waypoints": [
-      [
-        46.53,
-        30.77
-      ],
-      [
-        46.535,
-        30.776667
-      ],
-      [
-        46.54,
-        30.783333
-      ],
-      [
-        46.545,
-        30.79
-      ],
-      [
-        46.550667,
-        30.797333
-      ],
-      [
-        46.556333,
-        30.804667
-      ],
-      [
-        46.562,
-        30.812
-      ],
-      [
-        46.568,
-        30.817333
-      ],
-      [
-        46.574,
-        30.822667
-      ],
-      [
-        46.58,
-        30.828
-      ],
-      [
-        46.586,
-        30.826333
-      ],
-      [
-        46.592,
-        30.824667
-      ],
-      [
-        46.598,
-        30.823
-      ],
-      [
-        46.603333,
-        30.817
-      ],
-      [
-        46.608667,
-        30.811
-      ],
-      [
-        46.614,
-        30.805
-      ],
-      [
-        46.6185,
-        30.7915
-      ],
-      [
-        46.623,
-        30.778
-      ],
-      [
-        46.6225,
-        30.761
-      ],
-      [
-        46.622,
-        30.744
-      ],
-      [
-        46.6185,
-        30.7275
-      ],
-      [
-        46.615,
-        30.711
-      ],
-      [
-        46.6085,
-        30.696
-      ],
-      [
-        46.602,
-        30.681
-      ],
-      [
-        46.593,
-        30.666
-      ],
-      [
-        46.584,
-        30.651
-      ],
-      [
-        46.572,
-        30.636
-      ],
-      [
-        46.56,
-        30.621
-      ],
-      [
-        46.5465,
-        30.6065
-      ],
-      [
-        46.533,
-        30.592
-      ],
-      [
-        46.518,
-        30.5775
-      ],
-      [
-        46.503,
-        30.563
-      ],
-      [
-        46.4865,
-        30.549
-      ],
-      [
-        46.47,
-        30.535
-      ],
-      [
-        46.4525,
-        30.5215
-      ],
-      [
-        46.435,
-        30.508
-      ],
-      [
-        46.4165,
-        30.496
-      ],
-      [
-        46.398,
-        30.484
-      ],
-      [
-        46.379,
-        30.472
-      ],
-      [
-        46.36,
-        30.46
-      ],
-      [
-        46.341,
-        30.449
-      ],
-      [
-        46.322,
-        30.438
-      ],
-      [
-        46.3035,
-        30.428
-      ],
-      [
-        46.285,
-        30.418
-      ],
-      [
-        46.2665,
-        30.408
-      ],
-      [
-        46.248,
-        30.398
-      ],
-      [
-        46.234,
-        30.385
-      ],
-      [
-        46.22,
-        30.372
-      ],
-      [
-        46.205,
-        30.361
-      ],
-      [
-        46.19,
-        30.35
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Bilhorod-Dnistrovskyi",
-    "target": "Artsyz",
-    "base_time": 2.1,
-    "max_capacity": 76,
-    "current_flow": 45,
-    "waypoints": [
-      [
-        46.16,
-        30.2
-      ],
-      [
-        46.14,
-        30.05
-      ],
-      [
-        46.12,
-        29.88
-      ],
-      [
-        46.08,
-        29.72
-      ],
-      [
-        46.03,
-        29.58
-      ]
-    ],
-    "bidirectional": true
-  },
-  {
-    "source": "Artsyz",
-    "target": "Izmail",
-    "base_time": 2.6,
-    "max_capacity": 70,
-    "current_flow": 43,
-    "waypoints": [
-      [
-        45.92,
-        29.32
-      ],
-      [
-        45.86,
-        29.22
-      ],
-      [
-        45.77,
-        29.16
-      ],
-      [
-        45.67,
-        29.1
-      ],
-      [
-        45.54,
-        28.98
-      ],
-      [
-        45.42,
-        28.87
-      ]
-    ],
+    "current_flow": 33,
+    "waypoints": [],
     "bidirectional": true
   }
 ]

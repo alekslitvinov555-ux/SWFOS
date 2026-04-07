@@ -45,6 +45,7 @@ def build_graph(stations_path: str | Path, edges_path: str | Path) -> nx.DiGraph
             capacity=float(station["capacity"]),
             current_load=float(station["current_load"]),
             available_locomotives=int(station.get("available_locomotives", 5)),
+            is_ac_dc_switch=bool(station.get("is_ac_dc_switch", False)),
             lat=float(station["lat"]),
             lon=float(station["lon"]),
         )
@@ -56,6 +57,7 @@ def build_graph(stations_path: str | Path, edges_path: str | Path) -> nx.DiGraph
 
         edge_attrs = {
             "base_time": float(edge["base_time"]),
+            "track_type": str(edge.get("track_type", "double")),
             "max_capacity": float(edge["max_capacity"]),
             "current_flow": float(edge.get("current_flow", 0.0)),
             "waypoints": waypoints,
@@ -66,6 +68,7 @@ def build_graph(stations_path: str | Path, edges_path: str | Path) -> nx.DiGraph
         if edge.get("bidirectional", True):
             reverse_edge_attrs = {
                 "base_time": edge_attrs["base_time"],
+                "track_type": edge_attrs["track_type"],
                 "max_capacity": edge_attrs["max_capacity"],
                 "current_flow": edge_attrs["current_flow"],
                 "waypoints": [point[:] for point in reversed(waypoints)],

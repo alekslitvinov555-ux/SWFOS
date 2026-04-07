@@ -22,7 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 OPTIMIZED_TRACKS_PATH = DATA_DIR / "optimized_tracks.json"
 ODESSA_SORT_STATION = "Odesa-Sortuvalna"
-DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck")
+DERAILMENT_SCENARIO = "Derailment: Odesa-Skhidna to Kulyndorove"
+DERAILMENT_SOURCE = "Odesa-Skhidna"
+DERAILMENT_TARGET = "Kulyndorove"
+DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck", DERAILMENT_SCENARIO)
 
 
 def _maybe_clear_streamlit_cache() -> None:
@@ -107,19 +110,25 @@ def _apply_demo_scenario(graph: nx.DiGraph, scenario: str) -> None:
     for _u, _v, attrs in graph.edges(data=True):
         max_capacity = float(attrs.get("max_capacity", 0.0))
         attrs["current_flow"] = max_capacity * 0.25
+        attrs["disruption_penalty_hours"] = 0.0
 
-    if scenario != "Odesa Bottleneck" or ODESSA_SORT_STATION not in graph.nodes:
+    if scenario == "Odesa Bottleneck" and ODESSA_SORT_STATION in graph.nodes:
+        station_attrs = graph.nodes[ODESSA_SORT_STATION]
+        station_capacity = float(station_attrs.get("capacity", 0.0))
+        station_attrs["available_locomotives"] = 0
+        station_attrs["current_load"] = station_capacity
+
+        for u, v in graph.in_edges(ODESSA_SORT_STATION):
+            graph[u][v]["current_flow"] = float(graph[u][v].get("max_capacity", 0.0))
+        for u, v in graph.out_edges(ODESSA_SORT_STATION):
+            graph[u][v]["current_flow"] = float(graph[u][v].get("max_capacity", 0.0))
+
+    if scenario != DERAILMENT_SCENARIO:
         return
 
-    station_attrs = graph.nodes[ODESSA_SORT_STATION]
-    station_capacity = float(station_attrs.get("capacity", 0.0))
-    station_attrs["available_locomotives"] = 0
-    station_attrs["current_load"] = station_capacity
-
-    for u, v in graph.in_edges(ODESSA_SORT_STATION):
-        graph[u][v]["current_flow"] = float(graph[u][v].get("max_capacity", 0.0))
-    for u, v in graph.out_edges(ODESSA_SORT_STATION):
-        graph[u][v]["current_flow"] = float(graph[u][v].get("max_capacity", 0.0))
+    for u, v in ((DERAILMENT_SOURCE, DERAILMENT_TARGET), (DERAILMENT_TARGET, DERAILMENT_SOURCE)):
+        if graph.has_edge(u, v):
+            graph[u][v]["disruption_penalty_hours"] = 48.0
 
 
 def _build_event_log(
@@ -140,6 +149,12 @@ def _build_event_log(
             )
         if _utilization(odesa_attrs) >= 1.0:
             logs.append(f"🚧 {ODESSA_SORT_STATION} is at 100% station utilization.")
+    if scenario == DERAILMENT_SCENARIO and graph.has_edge(DERAILMENT_SOURCE, DERAILMENT_TARGET):
+        penalty_hours = int(float(graph[DERAILMENT_SOURCE][DERAILMENT_TARGET].get("disruption_penalty_hours", 0.0)))
+        if penalty_hours > 0:
+            logs.append(
+                f"🛑 Derailment on {DERAILMENT_SOURCE} ↔ {DERAILMENT_TARGET}: +{penalty_hours}h disruption penalty."
+            )
 
     if smart_route.path != baseline_route.path:
         logs.append(

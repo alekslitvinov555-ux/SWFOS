@@ -1,80 +1,65 @@
 [
   {
     "name": "Kryvyi Rih",
-    "capacity": 140,
-    "current_load": 88,
+    "capacity": 145,
+    "current_load": 82,
     "lat": 47.9105,
     "lon": 33.3918,
     "available_locomotives": 5
   },
   {
-    "name": "Dolynska",
-    "capacity": 115,
-    "current_load": 72,
-    "lat": 48.1085,
-    "lon": 32.7649,
-    "available_locomotives": 5
+    "name": "Tymkove",
+    "capacity": 120,
+    "current_load": 66,
+    "lat": 48.145,
+    "lon": 32.85,
+    "available_locomotives": 5,
+    "is_ac_dc_switch": true
   },
   {
-    "name": "Pomichna",
-    "capacity": 105,
-    "current_load": 67,
-    "lat": 48.2445,
-    "lon": 31.4168,
-    "available_locomotives": 5
-  },
-  {
-    "name": "Znamianka",
+    "name": "Kropyvnytska",
     "capacity": 135,
-    "current_load": 96,
-    "lat": 48.7128,
-    "lon": 32.6647,
-    "available_locomotives": 5
-  },
-  {
-    "name": "Kropyvnytskyi",
-    "capacity": 130,
     "current_load": 74,
     "lat": 48.5079,
     "lon": 32.2623,
     "available_locomotives": 5
   },
   {
-    "name": "Voznesensk",
-    "capacity": 110,
-    "current_load": 69,
-    "lat": 47.564,
-    "lon": 31.336,
+    "name": "Pomichna",
+    "capacity": 112,
+    "current_load": 63,
+    "lat": 48.2445,
+    "lon": 31.4168,
     "available_locomotives": 5
   },
   {
     "name": "Kolosivka",
-    "capacity": 100,
-    "current_load": 58,
+    "capacity": 108,
+    "current_load": 57,
     "lat": 47.29,
     "lon": 31.02,
     "available_locomotives": 5
   },
   {
-    "name": "Mykolaiv",
+    "name": "Odesa-Skhidna",
     "capacity": 150,
-    "current_load": 102,
-    "lat": 46.975,
-    "lon": 31.9946,
+    "current_load": 88,
+    "lat": 46.55,
+    "lon": 30.83,
     "available_locomotives": 5
   },
   {
-    "name": "Kherson",
-    "capacity": 125,
-    "current_load": 81,
-    "lat": 46.6354,
-    "lon": 32.6169,
+    "name": "Kulyndorove",
+    "capacity": 122,
+    "current_load": 69,
+    "lat": 46.58,
+    "lon": 30.78,
     "available_locomotives": 5
   },
   {
     "name": "Odesa-Sortuvalna",
     "capacity": 170,
-    "current_load": 156,
+    "current_load": 94,
     "lat": 46.53,
     "lon": 30.77,
     "available_locomotives": 0
@@ -82,49 +67,50 @@
   {
     "name": "Odesa-Port",
     "capacity": 165,
-    "current_load": 118,
+    "current_load": 112,
     "lat": 46.49,
     "lon": 30.74,
     "available_locomotives": 5
   },
   {
-    "name": "Chornomorsk-Bypass",
-    "capacity": 85,
-    "current_load": 24,
-    "lat": 46.76,
-    "lon": 30.9,
-    "available_locomotives": 5
-  },
-  {
-    "name": "Chornomorsk",
-    "capacity": 95,
-    "current_load": 55,
-    "lat": 46.3,
+    "name": "Chornomorsk Port",
+    "capacity": 118,
+    "current_load": 62,
+    "lat": 46.31,
     "lon": 30.66,
     "available_locomotives": 5
   },
   {
-    "name": "Bilhorod-Dnistrovskyi",
-    "capacity": 90,
-    "current_load": 52,
-    "lat": 46.19,
-    "lon": 30.35,
+    "name": "Borshchivka",
+    "capacity": 92,
+    "current_load": 41,
+    "lat": 47.83,
+    "lon": 31.08,
     "available_locomotives": 5
   },
   {
-    "name": "Artsyz",
-    "capacity": 85,
-    "current_load": 49,
-    "lat": 45.99,
-    "lon": 29.42,
+    "name": "Dnipro",
+    "capacity": 160,
+    "current_load": 101,
+    "lat": 48.4647,
+    "lon": 35.0462,
     "available_locomotives": 5
   },
   {
-    "name": "Izmail",
-    "capacity": 100,
-    "current_load": 63,
-    "lat": 45.351,
-    "lon": 28.836,
+    "name": "Pyatykhatky",
+    "capacity": 124,
+    "current_load": 68,
+    "lat": 48.41,
+    "lon": 33.72,
+    "available_locomotives": 5,
+    "is_ac_dc_switch": true
+  },
+  {
+    "name": "Znamianka",
+    "capacity": 138,
+    "current_load": 76,
+    "lat": 48.7128,
+    "lon": 32.6647,
     "available_locomotives": 5
   }
 ]

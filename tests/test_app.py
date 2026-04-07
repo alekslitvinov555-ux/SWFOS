@@ -5,6 +5,9 @@ import unittest
 import networkx as nx
 
 from app import (
+    DERAILMENT_SCENARIO,
+    DERAILMENT_SOURCE,
+    DERAILMENT_TARGET,
     ODESSA_SORT_STATION,
     _apply_demo_scenario,
     _build_event_log,
@@ -74,6 +77,18 @@ class TestAppHelpers(unittest.TestCase):
         self.assertTrue(any("0 locomotives" in item for item in log_items))
         self.assertTrue(any("AI rerouted" in item for item in log_items))
         self.assertTrue(any("+4,000 ₴" in item for item in log_items))
+
+    def test_apply_demo_scenario_derailment_sets_disruption_penalty(self) -> None:
+        graph = nx.DiGraph()
+        graph.add_node(DERAILMENT_SOURCE, capacity=100.0, current_load=20.0, available_locomotives=5, lat=0.0, lon=0.0)
+        graph.add_node(DERAILMENT_TARGET, capacity=100.0, current_load=20.0, available_locomotives=5, lat=0.0, lon=1.0)
+        graph.add_edge(DERAILMENT_SOURCE, DERAILMENT_TARGET, max_capacity=10.0, current_flow=1.0, base_time=1.0, waypoints=[])
+        graph.add_edge(DERAILMENT_TARGET, DERAILMENT_SOURCE, max_capacity=10.0, current_flow=1.0, base_time=1.0, waypoints=[])
+
+        _apply_demo_scenario(graph, DERAILMENT_SCENARIO)
+
+        self.assertEqual(graph[DERAILMENT_SOURCE][DERAILMENT_TARGET]["disruption_penalty_hours"], 48.0)
+        self.assertEqual(graph[DERAILMENT_TARGET][DERAILMENT_SOURCE]["disruption_penalty_hours"], 48.0)
 
 
 if __name__ == "__main__":

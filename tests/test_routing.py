@@ -5,7 +5,7 @@ from pathlib import Path
 
 import networkx as nx
 
-from app import _apply_demo_scenario
+from app import DERAILMENT_SCENARIO, _apply_demo_scenario
 from src.graph_builder import build_graph
 from src.routing import calculate_route_cost, find_optimal_route, find_shortest_distance_route
 
@@ -64,6 +64,15 @@ class TestRouting(unittest.TestCase):
         result = find_optimal_route(graph, source="A", target="D")
         self.assertEqual(result.path, ["A", "C", "D"])
 
+    def test_ac_dc_switch_adds_penalty_and_can_shift_route(self) -> None:
+        graph = self._build_base_graph()
+        graph.nodes["B"]["is_ac_dc_switch"] = True
+        graph["A"]["C"]["base_time"] = 1.05
+        graph["C"]["D"]["base_time"] = 1.05
+
+        result = find_optimal_route(graph, source="A", target="D")
+        self.assertEqual(result.path, ["A", "C", "D"])
+
     def test_shortest_distance_route_baseline_is_available(self) -> None:
         graph = self._build_base_graph()
 
@@ -90,8 +99,19 @@ class TestRouting(unittest.TestCase):
         _apply_demo_scenario(graph, "Odesa Bottleneck")
         result = find_optimal_route(graph, source="Kolosivka", target="Odesa-Port")
 
-        self.assertIn("Chornomorsk-Bypass", result.path)
+        self.assertIn("Chornomorsk Port", result.path)
         self.assertNotIn("Odesa-Sortuvalna", result.path)
+
+    def test_derailment_uses_bypass_via_pomichna_and_borshchivka(self) -> None:
+        project_root = Path(__file__).resolve().parents[1]
+        graph = build_graph(project_root / "data" / "stations.json", project_root / "data" / "edges.json")
+
+        _apply_demo_scenario(graph, DERAILMENT_SCENARIO)
+        result = find_optimal_route(graph, source="Odesa-Skhidna", target="Kulyndorove")
+
+        self.assertIn("Pomichna", result.path)
+        self.assertIn("Borshchivka", result.path)
+        self.assertNotEqual(result.path, ["Odesa-Skhidna", "Kulyndorove"])
 
 
 if __name__ == "__main__":
