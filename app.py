@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import math
 from pathlib import Path
 
 import folium
@@ -23,7 +24,7 @@ DATA_DIR = BASE_DIR / "data"
 OPTIMIZED_TRACKS_PATH = DATA_DIR / "optimized_tracks.json"
 ODESSA_SORT_STATION = "Odesa-Sortuvalna"
 DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck")
-# Approximate click snap radius (in lat/lon degrees) to map a click to the nearest station marker.
+# Approximate linear click snap radius in degrees; compared as squared distance for station matching.
 MAX_STATION_CLICK_DISTANCE_DEGREES = 0.03
 # Mock station analytics defaults used until live dispatcher telemetry is integrated.
 DEFAULT_STATION_TRACK_CAPACITY = 10
@@ -118,10 +119,18 @@ def _resolve_clicked_station(graph: nx.DiGraph, click_data: dict | None) -> str 
 
     nearest_station: str | None = None
     nearest_distance = float("inf")
+
+    def _distance_sq_scaled(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        mean_lat_rad = math.radians((lat1 + lat2) / 2.0)
+        lon_scale = max(0.1, abs(math.cos(mean_lat_rad)))
+        lat_delta = lat1 - lat2
+        lon_delta = (lon1 - lon2) * lon_scale
+        return lat_delta**2 + lon_delta**2
+
     for station, attrs in graph.nodes(data=True):
         lat = float(attrs["lat"])
         lon = float(attrs["lon"])
-        distance = (lat - float(clicked_lat)) ** 2 + (lon - float(clicked_lon)) ** 2
+        distance = _distance_sq_scaled(lat, lon, float(clicked_lat), float(clicked_lon))
         if distance < nearest_distance:
             nearest_distance = distance
             nearest_station = station
@@ -144,10 +153,7 @@ def _render_station_analytics(graph: nx.DiGraph, station: str) -> None:
         MOCK_MIN_WAITING_TRAINS,
         int(round(float(attrs.get("current_load", 0)) * MOCK_WAITING_TRAINS_RATIO)),
     )
-    # Mock delay output in whole hours for a clear dispatcher-style KPI readout.
-    estimated_delay_hours = MOCK_BASE_DELAY_HOURS + int(
-        round(utilization * MOCK_UTILIZATION_DELAY_MULTIPLIER)
-    )
+    estimated_delay_hours = _calculate_estimated_delay_hours(utilization)
     status_color, status_label = _station_congestion_style(attrs)
 
     with st.sidebar.expander("Station Analytics Dashboard", expanded=True):
@@ -163,6 +169,10 @@ def _render_station_analytics(graph: nx.DiGraph, station: str) -> None:
         with stat_col2:
             st.metric("Available Tracks", f"{available_tracks}/{max_tracks}")
             st.metric("Avg Delay", f"{estimated_delay_hours} hours")
+
+
+def _calculate_estimated_delay_hours(utilization: float) -> int:
+    return MOCK_BASE_DELAY_HOURS + int(round(utilization * MOCK_UTILIZATION_DELAY_MULTIPLIER))
 
 
 def _format_time(hours: float) -> str:
@@ -437,7 +447,7 @@ def main() -> None:
         clicked_station = _resolve_clicked_station(graph, (map_state or {}).get("last_object_clicked"))
         if clicked_station:
             st.session_state["selected_station"] = clicked_station
-            st.success(f"Selected station: {clicked_station}")
+            st.info(f"Selected station: {clicked_station} — see Station Analytics Dashboard in sidebar.")
     with log_tab:
         for item in event_log_items:
             st.write(f"- {item}")
