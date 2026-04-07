@@ -7,7 +7,13 @@ import networkx as nx
 
 from app import DERAILMENT_SCENARIO, _apply_demo_scenario
 from src.graph_builder import build_graph
-from src.routing import calculate_route_cost, find_optimal_route, find_shortest_distance_route
+from src.routing import (
+    AC_DC_SWITCH_PENALTY_HOURS,
+    DELAY_PENALTY_PER_HOUR,
+    calculate_route_cost,
+    find_optimal_route,
+    find_shortest_distance_route,
+)
 
 
 class TestRouting(unittest.TestCase):
@@ -72,7 +78,8 @@ class TestRouting(unittest.TestCase):
         graph.nodes["B"]["is_ac_dc_switch"] = True
         switch_cost = calculate_route_cost(graph, route=["A", "B", "D"])
 
-        self.assertGreater(switch_cost, base_cost + 5000.0)
+        expected_min_delta = AC_DC_SWITCH_PENALTY_HOURS * DELAY_PENALTY_PER_HOUR
+        self.assertGreaterEqual(switch_cost - base_cost, expected_min_delta)
 
     def test_shortest_distance_route_baseline_is_available(self) -> None:
         graph = self._build_base_graph()
@@ -95,13 +102,19 @@ class TestRouting(unittest.TestCase):
 
     def test_odessa_bottleneck_prefers_bypass_route(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
-        graph = build_graph(project_root / "data" / "stations.json", project_root / "data" / "edges.json")
+        normal_graph = build_graph(project_root / "data" / "stations.json", project_root / "data" / "edges.json")
+        bottleneck_graph = build_graph(project_root / "data" / "stations.json", project_root / "data" / "edges.json")
 
-        _apply_demo_scenario(graph, "Odesa Bottleneck")
-        result = find_optimal_route(graph, source="Kolosivka", target="Odesa-Port")
+        _apply_demo_scenario(normal_graph, "Normal Day")
+        _apply_demo_scenario(bottleneck_graph, "Odesa Bottleneck")
+        normal_result = find_optimal_route(normal_graph, source="Kolosivka", target="Odesa-Port")
+        bottleneck_result = find_optimal_route(bottleneck_graph, source="Kolosivka", target="Odesa-Port")
 
-        self.assertEqual(result.path[0], "Kolosivka")
-        self.assertEqual(result.path[-1], "Odesa-Port")
+        self.assertEqual(normal_result.path[0], "Kolosivka")
+        self.assertEqual(normal_result.path[-1], "Odesa-Port")
+        self.assertEqual(bottleneck_result.path[0], "Kolosivka")
+        self.assertEqual(bottleneck_result.path[-1], "Odesa-Port")
+        self.assertGreater(bottleneck_result.total_time_hours, normal_result.total_time_hours)
 
     def test_derailment_uses_bypass_via_pomichna_and_borshchivka(self) -> None:
         project_root = Path(__file__).resolve().parents[1]
