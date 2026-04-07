@@ -10,6 +10,8 @@ from app import (
     _build_event_log,
     _format_currency_uah,
     _format_time,
+    _resolve_clicked_station,
+    _station_congestion_style,
 )
 from src.routing import RouteResult
 
@@ -74,6 +76,30 @@ class TestAppHelpers(unittest.TestCase):
         self.assertTrue(any("0 locomotives" in item for item in log_items))
         self.assertTrue(any("AI rerouted" in item for item in log_items))
         self.assertTrue(any("+4,000 ₴" in item for item in log_items))
+
+    def test_station_congestion_style_for_free_busy_bottleneck(self) -> None:
+        free_color, free_label = _station_congestion_style(
+            {"capacity": 100.0, "current_load": 10.0, "available_locomotives": 2}
+        )
+        busy_color, busy_label = _station_congestion_style(
+            {"capacity": 100.0, "current_load": 75.0, "available_locomotives": 2}
+        )
+        bottleneck_color, bottleneck_label = _station_congestion_style(
+            {"capacity": 100.0, "current_load": 10.0, "available_locomotives": 0}
+        )
+
+        self.assertEqual((free_color, free_label), ("#22c55e", "Free"))
+        self.assertEqual((busy_color, busy_label), ("#facc15", "Busy"))
+        self.assertEqual((bottleneck_color, bottleneck_label), ("#ef4444", "Bottleneck"))
+
+    def test_resolve_clicked_station_maps_to_nearest_marker(self) -> None:
+        graph = self._graph()
+
+        selected_station = _resolve_clicked_station(graph, {"lat": 0.0, "lng": 0.0})
+        self.assertEqual(selected_station, "A")
+
+        too_far = _resolve_clicked_station(graph, {"lat": 10.0, "lng": 10.0})
+        self.assertIsNone(too_far)
 
 
 if __name__ == "__main__":

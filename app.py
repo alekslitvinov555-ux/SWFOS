@@ -86,6 +86,68 @@ def _utilization(attrs: dict) -> float:
     return current_load / capacity if capacity > 0 else 1.0
 
 
+def _station_congestion_style(attrs: dict) -> tuple[str, str]:
+    utilization = _utilization(attrs)
+    available_locomotives = int(attrs.get("available_locomotives", 0))
+    if available_locomotives <= 0 or utilization >= 0.95:
+        return "#ef4444", "Bottleneck"
+    if utilization >= 0.7:
+        return "#facc15", "Busy"
+    return "#22c55e", "Free"
+
+
+def _resolve_clicked_station(graph: nx.DiGraph, click_data: dict | None) -> str | None:
+    if not click_data:
+        return None
+
+    clicked_lat = click_data.get("lat")
+    clicked_lon = click_data.get("lng", click_data.get("lon"))
+    if clicked_lat is None or clicked_lon is None:
+        return None
+
+    nearest_station: str | None = None
+    nearest_distance = float("inf")
+    for station, attrs in graph.nodes(data=True):
+        lat = float(attrs["lat"])
+        lon = float(attrs["lon"])
+        distance = (lat - float(clicked_lat)) ** 2 + (lon - float(clicked_lon)) ** 2
+        if distance < nearest_distance:
+            nearest_distance = distance
+            nearest_station = station
+
+    max_click_distance_sq = 0.03**2
+    if nearest_distance > max_click_distance_sq:
+        return None
+    return nearest_station
+
+
+def _render_station_analytics(graph: nx.DiGraph, station: str) -> None:
+    attrs = graph.nodes[station]
+    utilization = _utilization(attrs)
+    available_locomotives = int(attrs.get("available_locomotives", 0))
+
+    max_tracks = 10
+    used_tracks = min(max_tracks, max(0, int(round(utilization * max_tracks))))
+    available_tracks = max_tracks - used_tracks
+    trains_waiting = max(1, int(round(float(attrs.get("current_load", 0)) * 0.15)))
+    avg_delay_hours = 4 + int(round(utilization * 3))
+    status_color, status_label = _station_congestion_style(attrs)
+
+    with st.sidebar.expander("Station Analytics Dashboard", expanded=True):
+        st.markdown(f"### {station}")
+        st.markdown(
+            f"**Congestion Status:** <span style='color:{status_color};font-weight:600'>{status_label}</span>",
+            unsafe_allow_html=True,
+        )
+        stat_col1, stat_col2 = st.columns(2)
+        with stat_col1:
+            st.metric("Current Trains Waiting", trains_waiting)
+            st.metric("Available Locomotives", available_locomotives)
+        with stat_col2:
+            st.metric("Available Tracks", f"{available_tracks}/{max_tracks}")
+            st.metric("Avg Delay", f"{avg_delay_hours} hours")
+
+
 def _format_time(hours: float) -> str:
     total_minutes = int(round(hours * 60))
     hrs, mins = divmod(total_minutes, 60)
@@ -202,33 +264,50 @@ def _build_map(graph, route: list[str]) -> folium.Map:
         for segment in optimized_tracks.get("network_segments", []):
             folium.PolyLine(
                 locations=segment,
-                color="#5b5b5b",
-                weight=2,
-                opacity=0.55,
+                color="#666666",
+                weight=1.8,
+                opacity=0.35,
             ).add_to(network_group)
 
         network_group.add_to(m)
     else:
-        st.warning(
-            "`data/optimized_tracks.json` not found. Run `build_optimized_tracks.py` first for fast GIS mode."
-        )
+        network_group = folium.FeatureGroup(name="Rail Network", overlay=True, control=True)
+        for u, v in graph.edges():
+            start_node_coords = [float(graph.nodes[u]["lat"]), float(graph.nodes[u]["lon"])]
+            end_node_coords = [float(graph.nodes[v]["lat"]), float(graph.nodes[v]["lon"])]
+            edge_data = _extract_edge_data(graph, u, v)
+            edge_wps = edge_data.get("waypoints", [])
+            segment_coords = [start_node_coords] + edge_wps + [end_node_coords]
+            folium.PolyLine(
+                locations=segment_coords,
+                color="#666666",
+                weight=1.8,
+                opacity=0.35,
+            ).add_to(network_group)
+        network_group.add_to(m)
 
     for node, attrs in graph.nodes(data=True):
         utilization = _utilization(attrs)
-        color = "red" if utilization > 0.9 else "green"
+        color, congestion_label = _station_congestion_style(attrs)
 
         folium.CircleMarker(
             location=(attrs["lat"], attrs["lon"]),
             radius=9,
             color=color,
             fill=True,
+            fill_color=color,
             fill_opacity=0.8,
-            tooltip=f"{node} | Load: {attrs['current_load']}/{attrs['capacity']} ({utilization:.1%})",
+            tooltip=(
+                f"{node} | {congestion_label} | Load: {attrs['current_load']}/"
+                f"{attrs['capacity']} ({utilization:.1%})"
+            ),
             popup=(
                 f"{node}<br>"
+                f"Status: {congestion_label}<br>"
                 f"Capacity: {attrs['capacity']}<br>"
                 f"Current load: {attrs['current_load']}<br>"
-                f"Utilization: {utilization:.1%}"
+                f"Utilization: {utilization:.1%}<br>"
+                f"Available locomotives: {int(attrs.get('available_locomotives', 0))}"
             ),
         ).add_to(m)
 
@@ -244,12 +323,18 @@ def _build_map(graph, route: list[str]) -> folium.Map:
             edge_wps = edge_data.get("waypoints", [])
             segment_coords = [start_node_coords] + edge_wps + [end_node_coords]
 
-        st.sidebar.write(f"Segment {u} -> {v}: drawn using {len(segment_coords)} coordinates.")
+        folium.PolyLine(
+            locations=segment_coords,
+            color="#34f5ff",
+            weight=10,
+            opacity=0.25,
+            tooltip=f"Optimized route: {u} -> {v}",
+        ).add_to(m)
 
         folium.PolyLine(
             locations=segment_coords,
-            color="blue",
-            weight=5,
+            color="#20ffd5",
+            weight=6,
             opacity=0.9,
             tooltip=f"Optimized route: {u} -> {v}",
         ).add_to(m)
@@ -336,16 +421,24 @@ def main() -> None:
     route_map = _build_map(graph, result.path)
     map_tab, log_tab = st.tabs(["Route Map", "Enterprise Event Log"])
     with map_tab:
-        st_folium(
+        map_state = st_folium(
             route_map,
             width=800,
             height=620,
-            returned_objects=[],
+            returned_objects=["last_object_clicked"],
             use_container_width=True,
         )
+        clicked_station = _resolve_clicked_station(graph, (map_state or {}).get("last_object_clicked"))
+        if clicked_station:
+            st.session_state["selected_station"] = clicked_station
+            st.success(f"Selected station: {clicked_station}")
     with log_tab:
         for item in event_log_items:
             st.write(f"- {item}")
+
+    selected_station = st.session_state.get("selected_station")
+    if selected_station in graph.nodes:
+        _render_station_analytics(graph, selected_station)
 
 
 if __name__ == "__main__":
