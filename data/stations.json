@@ -1,0 +1,107 @@
+[
+  {
+    "name": "Kryvyi Rih",
+    "capacity": 140,
+    "current_load": 88,
+    "lat": 47.9105,
+    "lon": 33.3918
+  },
+  {
+    "name": "Dolynska",
+    "capacity": 115,
+    "current_load": 72,
+    "lat": 48.1085,
+    "lon": 32.7649
+  },
+  {
+    "name": "Pomichna",
+    "capacity": 105,
+    "current_load": 67,
+    "lat": 48.2445,
+    "lon": 31.4168
+  },
+  {
+    "name": "Znamianka",
+    "capacity": 135,
+    "current_load": 96,
+    "lat": 48.7128,
+    "lon": 32.6647
+  },
+  {
+    "name": "Kropyvnytskyi",
+    "capacity": 130,
+    "current_load": 74,
+    "lat": 48.5079,
+    "lon": 32.2623
+  },
+  {
+    "name": "Voznesensk",
+    "capacity": 110,
+    "current_load": 69,
+    "lat": 47.5640,
+    "lon": 31.3360
+  },
+  {
+    "name": "Kolosivka",
+    "capacity": 100,
+    "current_load": 58,
+    "lat": 47.2900,
+    "lon": 31.0200
+  },
+  {
+    "name": "Mykolaiv",
+    "capacity": 150,
+    "current_load": 102,
+    "lat": 46.9750,
+    "lon": 31.9946
+  },
+  {
+    "name": "Kherson",
+    "capacity": 125,
+    "current_load": 81,
+    "lat": 46.6354,
+    "lon": 32.6169
+  },
+  {
+    "name": "Odesa-Sortuvalna",
+    "capacity": 170,
+    "current_load": 156,
+    "lat": 46.5300,
+    "lon": 30.7700
+  },
+  {
+    "name": "Odesa-Port",
+    "capacity": 165,
+    "current_load": 118,
+    "lat": 46.4900,
+    "lon": 30.7400
+  },
+  {
+    "name": "Chornomorsk",
+    "capacity": 95,
+    "current_load": 55,
+    "lat": 46.3000,
+    "lon": 30.6600
+  },
+  {
+    "name": "Bilhorod-Dnistrovskyi",
+    "capacity": 90,
+    "current_load": 52,
+    "lat": 46.1900,
+    "lon": 30.3500
+  },
+  {
+    "name": "Artsyz",
+    "capacity": 85,
+    "current_load": 49,
+    "lat": 45.9900,
+    "lon": 29.4200
+  },
+  {
+    "name": "Izmail",
+    "capacity": 100,
+    "current_load": 63,
+    "lat": 45.3510,
+    "lon": 28.8360
+  }
+]
