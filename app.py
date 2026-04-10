@@ -24,6 +24,8 @@ DATA_DIR = BASE_DIR / "data"
 OPTIMIZED_TRACKS_PATH = DATA_DIR / "optimized_tracks.json"
 ODESSA_SORT_STATION = "Odesa-Sortuvalna"
 DERAILMENT_SCENARIO = "Derailment Near Odesa"
+DERAILMENT_PRIMARY_SOURCE = "Kolosivka"
+DERAILMENT_TIME_PENALTY_MULTIPLIER = 4
 DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck", DERAILMENT_SCENARIO)
 # Approximate linear click snap radius in degrees; compared using latitude-adjusted squared distance.
 MAX_STATION_CLICK_DISTANCE_DEGREES = 0.03
@@ -215,18 +217,29 @@ def _apply_demo_scenario(graph: nx.DiGraph, scenario: str) -> None:
         attrs["available_locomotives"] = 5
         attrs["current_load"] = min(attrs.get("current_load", 0.0), capacity * 0.35)
 
+    # Reset all edge-level simulation artifacts before applying a specific demo scenario.
     for _u, _v, attrs in graph.edges(data=True):
         max_capacity = float(attrs.get("max_capacity", 0.0))
         attrs["current_flow"] = max_capacity * 0.25
+        # Scenario flags are synthetic and must not leak across reruns.
         attrs.pop("incident", None)
 
     if scenario == DERAILMENT_SCENARIO and ODESSA_SORT_STATION in graph.nodes:
         incoming_edges = sorted(graph.in_edges(ODESSA_SORT_STATION))
-        if incoming_edges:
-            derail_u, derail_v = incoming_edges[0]
+        preferred_edge = (DERAILMENT_PRIMARY_SOURCE, ODESSA_SORT_STATION)
+        if preferred_edge in incoming_edges:
+            derailment_edge = preferred_edge
+        elif incoming_edges:
+            derailment_edge = incoming_edges[0]
+        else:
+            derailment_edge = None
+        if derailment_edge:
+            derail_u, derail_v = derailment_edge
             derail_edge = graph[derail_u][derail_v]
             derail_edge["current_flow"] = float(derail_edge.get("max_capacity", 0.0))
-            derail_edge["base_time"] = float(derail_edge.get("base_time", 0.0)) * 4
+            derail_edge["base_time"] = (
+                float(derail_edge.get("base_time", 0.0)) * DERAILMENT_TIME_PENALTY_MULTIPLIER
+            )
             derail_edge["incident"] = "derailment"
         return
 
