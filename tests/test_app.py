@@ -5,6 +5,7 @@ import unittest
 import networkx as nx
 
 from app import (
+    DERAILMENT_SCENARIO,
     ODESSA_SORT_STATION,
     _apply_demo_scenario,
     _build_event_log,
@@ -42,6 +43,16 @@ class TestAppHelpers(unittest.TestCase):
         self.assertEqual(graph["A"][ODESSA_SORT_STATION]["current_flow"], 10.0)
         self.assertEqual(graph[ODESSA_SORT_STATION]["C"]["current_flow"], 10.0)
 
+    def test_apply_demo_scenario_derailment(self) -> None:
+        graph = self._graph()
+        baseline_time = graph["A"][ODESSA_SORT_STATION]["base_time"]
+
+        _apply_demo_scenario(graph, DERAILMENT_SCENARIO)
+
+        self.assertEqual(graph["A"][ODESSA_SORT_STATION]["current_flow"], 10.0)
+        self.assertEqual(graph["A"][ODESSA_SORT_STATION]["incident"], "derailment")
+        self.assertEqual(graph["A"][ODESSA_SORT_STATION]["base_time"], baseline_time * 4)
+
     def test_event_log_mentions_penalty_and_savings(self) -> None:
         graph = self._graph()
         _apply_demo_scenario(graph, "Odesa Bottleneck")
@@ -76,6 +87,39 @@ class TestAppHelpers(unittest.TestCase):
         self.assertTrue(any("0 locomotives" in item for item in log_items))
         self.assertTrue(any("AI rerouted" in item for item in log_items))
         self.assertTrue(any("+4,000 ₴" in item for item in log_items))
+
+    def test_event_log_mentions_derailment(self) -> None:
+        graph = self._graph()
+        _apply_demo_scenario(graph, DERAILMENT_SCENARIO)
+        smart = RouteResult(
+            path=["A", "C"],
+            total_cost=1000.0,
+            segment_costs=[1000.0],
+            total_time_hours=1.0,
+            segment_times_hours=[1.0],
+            total_distance_km=10.0,
+            segment_distances_km=[10.0],
+        )
+        baseline = RouteResult(
+            path=["A", ODESSA_SORT_STATION, "C"],
+            total_cost=5000.0,
+            segment_costs=[2500.0, 2500.0],
+            total_time_hours=2.0,
+            segment_times_hours=[1.0, 1.0],
+            total_distance_km=20.0,
+            segment_distances_km=[10.0, 10.0],
+        )
+
+        log_items = _build_event_log(
+            graph=graph,
+            scenario=DERAILMENT_SCENARIO,
+            smart_route=smart,
+            baseline_route=baseline,
+            baseline_cost=5000.0,
+            money_saved=4000.0,
+        )
+
+        self.assertTrue(any("Derailment reported" in item for item in log_items))
 
     def test_station_congestion_style_for_free_busy_bottleneck(self) -> None:
         free_color, free_label = _station_congestion_style(
