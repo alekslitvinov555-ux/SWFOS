@@ -23,7 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 OPTIMIZED_TRACKS_PATH = DATA_DIR / "optimized_tracks.json"
 ODESSA_SORT_STATION = "Odesa-Sortuvalna"
-DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck")
+DERAILMENT_SCENARIO = "Derailment Near Odesa"
+DEMO_SCENARIOS = ("Normal Day", "Odesa Bottleneck", DERAILMENT_SCENARIO)
 # Approximate linear click snap radius in degrees; compared using latitude-adjusted squared distance.
 MAX_STATION_CLICK_DISTANCE_DEGREES = 0.03
 # Mock station analytics defaults used until live dispatcher telemetry is integrated.
@@ -217,6 +218,17 @@ def _apply_demo_scenario(graph: nx.DiGraph, scenario: str) -> None:
     for _u, _v, attrs in graph.edges(data=True):
         max_capacity = float(attrs.get("max_capacity", 0.0))
         attrs["current_flow"] = max_capacity * 0.25
+        attrs.pop("incident", None)
+
+    if scenario == DERAILMENT_SCENARIO and ODESSA_SORT_STATION in graph.nodes:
+        incoming_edges = sorted(graph.in_edges(ODESSA_SORT_STATION))
+        if incoming_edges:
+            derail_u, derail_v = incoming_edges[0]
+            derail_edge = graph[derail_u][derail_v]
+            derail_edge["current_flow"] = float(derail_edge.get("max_capacity", 0.0))
+            derail_edge["base_time"] = float(derail_edge.get("base_time", 0.0)) * 4
+            derail_edge["incident"] = "derailment"
+        return
 
     if scenario != "Odesa Bottleneck" or ODESSA_SORT_STATION not in graph.nodes:
         return
@@ -241,6 +253,13 @@ def _build_event_log(
     money_saved: float,
 ) -> list[str]:
     logs: list[str] = []
+
+    if scenario == DERAILMENT_SCENARIO and ODESSA_SORT_STATION in graph.nodes:
+        for u, v in sorted(graph.in_edges(ODESSA_SORT_STATION)):
+            edge_attrs = graph[u][v]
+            if edge_attrs.get("incident") == "derailment":
+                logs.append(f"🚨 Derailment reported on {u} ➜ {v}; traffic rerouted around the incident.")
+                break
 
     if scenario == "Odesa Bottleneck" and ODESSA_SORT_STATION in graph.nodes:
         odesa_attrs = graph.nodes[ODESSA_SORT_STATION]
